@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { loginUser } from "../auth/auth";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../auth/AuthProvider";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const auth = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,9 +18,10 @@ const LoginPage = () => {
       password,
     };
 
-    const response = await loginUser(loginDetails);
+    const response = await auth.loginUser(loginDetails);
     if (response == 200) {
       toast.success("Login Successful");
+      navigate("/");
     } else {
       toast.error("Invalid Credentials Entered. Please Try Again");
     }

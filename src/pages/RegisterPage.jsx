@@ -1,13 +1,17 @@
 import { React, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { registerUser } from "../auth/auth";
+import { useAuth } from "../auth/AuthProvider";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("student");
   const [password, setPassword] = useState("");
+
+  const auth = useAuth();
+
+  const navigator = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +23,10 @@ const RegisterPage = () => {
       password,
     };
 
-    const response = await registerUser(newUser);
+    const response = await auth.registerUser(newUser);
     if (response == 201) {
       toast.success("Registration Successful!");
+      navigator('/login');
     } else {
       toast.error("Registration Unsuccessful. Please Try Again.");
     }

@@ -23,7 +23,7 @@ const RegisterPage = () => {
     if (response == 201) {
       toast.success("Registration Successful!");
     } else {
-      toast.success("Registration Unsuccessful. Please Try Again.");
+      toast.error("Registration Unsuccessful. Please Try Again.");
     }
   };
 

@@ -11,7 +11,7 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen bg-blue-100">
       <Navbar />
       <div className="flex flex-grow justify-center items-center text-2xl font-semibold text-gray-800 flex-col">
-        Hello, {auth.userName || "You're not yet signed in"}!
+        {auth.userName ? `Hello ${auth.userName}, welcome to AiTutor.` : "Hello, you are not yet signed in"}
         <button
           onClick={() => {
             navigator("/login");

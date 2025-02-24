@@ -1,23 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthProvider";
+import avatar from "../images/avatar-default.png";
 
 const EditProfilePage = () => {
   const [name, setName] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [preview, setPreview] = useState(null); // For displaying the new uploaded image
 
   const navigate = useNavigate();
   const auth = useAuth();
 
+  useEffect(() => {
+    // Fetch current user details to pre-fill form
+    const fetchUserData = async () => {
+      const userData = await auth.getUserProfile();
+      setName(userData.user.name || "");
+      setProfilePicture(userData.user.profilePicture || avatar);
+    };
+
+    fetchUserData();
+  }, [auth]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+      setProfilePicture(file); // Store the file for upload
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const userData = {
-      name,
-    };
+    const formData = new FormData();
+    formData.append("name", name);
+    if (profilePicture instanceof File) {
+      formData.append("profilePicture", profilePicture);
+    }
 
-    const response = await auth.editUserProfile(userData);
-    if (response == 200) {
+    const response = await auth.editUserProfile(formData);
+    if (response === 200) {
       toast.success("Profile updated successfully!");
       navigate("/view-profile");
     } else {
@@ -32,7 +56,16 @@ const EditProfilePage = () => {
           Edit Profile
         </h2>
 
-        <form onSubmit={handleSubmit}>
+        {/* Profile Picture Preview */}
+        <div className="flex justify-center mb-4">
+          <img
+            src={preview || profilePicture}
+            alt="Profile"
+            className="w-24 h-24 rounded-full border border-gray-300 object-cover"
+          />
+        </div>
+
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="mb-4">
             <label className="block text-gray-700">Full Name</label>
             <input
@@ -42,6 +75,17 @@ const EditProfilePage = () => {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Profile Picture</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-full p-2 border rounded-md"
+              onChange={handleImageChange}
             />
           </div>
 

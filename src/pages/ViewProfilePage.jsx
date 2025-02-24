@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
+import avatar from "../images/avatar-default.png";
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState({ user: {} });
   const [loading, setLoading] = useState(true);
-  
-  const auth = useAuth(); 
+
+  const auth = useAuth();
 
   useEffect(() => {
     try {
@@ -34,6 +35,15 @@ const ProfilePage = () => {
         <h2 className="text-2xl font-semibold text-blue-600 text-center mb-6">
           My Profile
         </h2>
+
+        {/* Profile Picture Section */}
+        <div className="flex justify-center mb-4">
+          <img
+            src={userData.user["profilePicture"] || avatar}
+            alt="Profile"
+            className="w-24 h-24 rounded-full border border-gray-300 object-cover"
+          />
+        </div>
 
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold">

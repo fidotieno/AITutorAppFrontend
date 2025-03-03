@@ -10,7 +10,7 @@ const NotLoggedInCard = () => {
       <div className="text-blue-500 text-5xl mb-4">🔒</div>
 
       {/* Title */}
-      <h2 className="text-2xl font-semibold text-gray-800">Welcome to AiTutor</h2>
+      <h2 className="text-2xl font-semibold text-gray-800">Welcome to EduTech</h2>
 
       {/* Message */}
       <p className="text-gray-600 mt-2">

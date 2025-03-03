@@ -12,7 +12,7 @@ const Navbar = () => {
         to="/"
         className="text-xl font-semibold hover:text-gray-300 transition duration-300"
       >
-        AiTutor
+        EduTech
       </Link>
       {auth.token && (
         <div className="flex items-center gap-6">

@@ -8,7 +8,12 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-500 text-white p-4 flex justify-between items-center shadow-md">
-      <h1 className="text-xl font-semibold">AiTutor</h1>
+      <Link
+        to="/"
+        className="text-xl font-semibold hover:text-gray-300 transition duration-300"
+      >
+        AiTutor
+      </Link>
       {auth.token && (
         <div className="flex items-center gap-6">
           <Link

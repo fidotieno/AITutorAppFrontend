@@ -50,7 +50,6 @@ const enrollCourse = async (courseId) => {
     }
   );
   const returnedData = await res.json();
-  console.log(returnedData);
   return res.status;
 };
 
@@ -107,7 +106,6 @@ const createCourse = async (courseData) => {
       body: JSON.stringify(courseData),
     }
   );
-  console.log(res.status);
   return res.status;
 };
 
@@ -148,10 +146,54 @@ const uploadFiles = async (courseId, formData) => {
         body: formData,
       }
     );
-    console.log(response);
     if (response.ok) return response.status;
   } catch (error) {
     console.error("File upload error:", error);
+  }
+};
+
+const deleteCourseFile = async (courseId, fileName) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      import.meta.env.VITE_APP_ENVIRONMENT == "development"
+        ? `/api/api/courses/${courseId}/delete-file/${fileName}`
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/courses//${courseId}/delete-file/${fileName}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.ok) return response.status;
+  } catch (error) {
+    console.error("File deletion error:", error);
+  }
+};
+
+const replaceCourseFile = async (courseId, fileName, formData) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      import.meta.env.VITE_APP_ENVIRONMENT == "development"
+        ? `/api/api/courses/${courseId}/replace-file/${fileName}`
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/courses//${courseId}/replace-file/${fileName}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+    if (response.ok) return response.status;
+  } catch (error) {
+    console.error("File deletion error:", error);
   }
 };
 
@@ -164,4 +206,6 @@ export {
   createCourse,
   editCourse,
   uploadFiles,
+  deleteCourseFile,
+  replaceCourseFile,
 };

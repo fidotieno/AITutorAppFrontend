@@ -129,7 +129,7 @@ const AuthProvider = ({ children }) => {
         ? "/api/api/users/edit-profile"
         : `${import.meta.env.VITE_APP_BACKEND_URL}/api/users/edit-profile`,
       {
-        method: "POST",
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
         },

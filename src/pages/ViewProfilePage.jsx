@@ -39,7 +39,12 @@ const ProfilePage = () => {
         {/* Profile Picture Section */}
         <div className="flex justify-center mb-4">
           <img
-            src={userData.user["profilePicture"] || avatar}
+            src={
+              userData.user["profilePhoto"]?.["url"]?.replace(
+                "dl=0",
+                "raw=1"
+              ) || avatar
+            }
             alt="Profile"
             className="w-24 h-24 rounded-full border border-gray-300 object-cover"
           />

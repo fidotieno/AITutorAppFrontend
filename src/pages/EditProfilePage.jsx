@@ -17,7 +17,9 @@ const EditProfilePage = () => {
     const fetchUserData = async () => {
       const userData = await auth.getUserProfile();
       setName(userData.user.name || "");
-      setProfilePicture(userData.user.profilePicture || avatar);
+      setProfilePicture(
+        userData.user.profilePhoto.url?.replace("dl=0", "raw=1") || avatar
+      );
     };
 
     fetchUserData();
@@ -37,7 +39,7 @@ const EditProfilePage = () => {
     const formData = new FormData();
     formData.append("name", name);
     if (profilePicture instanceof File) {
-      formData.append("profilePicture", profilePicture);
+      formData.append("file", profilePicture);
     }
 
     const response = await auth.editUserProfile(formData);

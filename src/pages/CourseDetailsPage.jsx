@@ -1,29 +1,80 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCourse } from "../api/CourseApis";
-import CourseMaterials from "../components/CourseMaterials"; 
+import {
+  getCourse,
+  enrollCourse,
+  unenrollCourse,
+  getEnrolledCourses,
+  removeStudentFromCourse,
+} from "../api/CourseApis";
+import { toast } from "react-toastify";
+import CourseMaterials from "../components/CourseMaterials";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
   const auth = useAuth();
   const navigate = useNavigate();
   const [courseData, setCourseData] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(true);
 
   useEffect(() => {
-    const fetchCourseData = async (id) => {
+    const fetchCourseData = async () => {
       try {
         const data = await getCourse(id);
         setCourseData(data);
+        if (auth.user) {
+          setIsEnrolled(
+            data.studentsEnrolled.some(
+              (student) => student._id === auth.user._id
+            )
+          );
+        }
       } catch (error) {
         console.error("Error fetching course data:", error);
         setCourseData(null);
       }
     };
 
-    fetchCourseData(id);
-  }, [id]);
+    fetchCourseData();
+  }, [id, auth.user]);
+
+  const handleEnrollment = async () => {
+    try {
+      if (isEnrolled) {
+        const response = await unenrollCourse(id);
+        if (response === 200) toast.success("Unenrollment successful!.");
+        else
+          toast.error("Error unenrolling from the course. Please try again.");
+      } else {
+        const response = await enrollCourse({ courseId: id });
+        if (response === 200) toast.success("Enrollment successful!");
+        else toast.error("Error enrolling in the course. Please try again.");
+      }
+      // Refresh course data
+      const updatedCourse = await getCourse(id);
+      setCourseData(updatedCourse);
+      setIsEnrolled(!isEnrolled);
+    } catch (error) {
+      toast.error("Failed to update enrollment status.");
+    }
+  };
+
+  const handleRemoveStudent = async (studentId) => {
+    try {
+      const response = await removeStudentFromCourse(id, studentId);
+      if (response === 200) toast.success("Student removed from the course.");
+      else toast.error("Failed to remove student.");
+      setCourseData({
+        ...courseData,
+        studentsEnrolled: courseData.studentsEnrolled.filter(
+          (s) => s._id !== studentId
+        ),
+      });
+    } catch (error) {
+      toast.error("Failed to remove student.");
+    }
+  };
 
   if (!courseData) {
     return <p>Loading course details...</p>;
@@ -37,6 +88,20 @@ const CourseDetailsPage = () => {
       {/* Course Materials Section */}
       <CourseMaterials files={courseData.files} />
 
+      {/* Enrollment Button */}
+      {auth.role === "student" && (
+        <button
+          className={`mt-4 px-4 py-2 rounded-md shadow ${
+            isEnrolled
+              ? "bg-red-500 hover:bg-red-600 hover:cursor-pointer"
+              : "bg-green-500 hover:bg-green-600 hover:cursor-pointer"
+          } text-white transition`}
+          onClick={handleEnrollment}
+        >
+          {isEnrolled ? "Unenroll" : "Enroll"}
+        </button>
+      )}
+
       {/* List of Enrolled Students */}
       <section className="mt-6">
         <h2 className="text-xl font-semibold mb-3">Enrolled Students</h2>
@@ -49,6 +114,14 @@ const CourseDetailsPage = () => {
               >
                 <span className="font-medium">{student.name}</span>
                 <span className="text-sm text-gray-600">{student.email}</span>
+                {auth.role === "teacher" && (
+                  <button
+                    className="ml-4 px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 hover:cursor-pointer"
+                    onClick={() => handleRemoveStudent(student._id)}
+                  >
+                    Remove
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -60,7 +133,7 @@ const CourseDetailsPage = () => {
       {/* Edit Course Button (Only for Teachers) */}
       {auth.role === "teacher" && (
         <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:cursor-pointer"
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
           onClick={() => navigate(`/edit-course/${id}`)}
         >
           Edit Course

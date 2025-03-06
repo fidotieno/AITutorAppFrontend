@@ -3,7 +3,9 @@ import { useContext, createContext, useState } from "react";
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [userName, setUserName] = useState(localStorage.getItem("userName") || null);
+  const [userName, setUserName] = useState(
+    localStorage.getItem("userName") || null
+  );
   const [userId, setUserId] = useState(localStorage.getItem("userId") || null);
   const [role, setRole] = useState(localStorage.getItem("role") || null);
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -80,7 +82,9 @@ const AuthProvider = ({ children }) => {
     const res = await fetch(
       import.meta.env.VITE_APP_ENVIRONMENT === "development"
         ? `/api/api/auth/reset-password/${token}`
-        : `${import.meta.env.VITE_APP_BACKEND_URL}/api/auth/reset-password/${token}`,
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/auth/reset-password/${token}`,
       {
         method: "POST",
         headers: {
@@ -141,7 +145,7 @@ const AuthProvider = ({ children }) => {
       setUserName(userData.name);
       localStorage.setItem("userName", userData.name); // Update in localStorage
     }
-    
+
     return res.status;
   };
 

@@ -49,7 +49,44 @@ const enrollCourse = async (courseId) => {
       body: JSON.stringify(courseId),
     }
   );
-  const returnedData = await res.json();
+  return res.status;
+};
+
+const unenrollCourse = async (courseId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    import.meta.env.VITE_APP_ENVIRONMENT == "development"
+      ? `/api/api/courses/${courseId}/unenroll`
+      : `${
+          import.meta.env.VITE_APP_BACKEND_URL
+        }/api/courses/${courseId}/unenroll`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.status;
+};
+
+const removeStudentFromCourse = async (courseId, studentId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    import.meta.env.VITE_APP_ENVIRONMENT == "development"
+      ? `/api/api/courses/${courseId}/remove-student/${studentId}`
+      : `${
+          import.meta.env.VITE_APP_BACKEND_URL
+        }/api/courses/${courseId}/remove-student/${studentId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   return res.status;
 };
 
@@ -208,4 +245,6 @@ export {
   uploadFiles,
   deleteCourseFile,
   replaceCourseFile,
+  unenrollCourse,
+  removeStudentFromCourse,
 };

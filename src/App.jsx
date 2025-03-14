@@ -22,6 +22,7 @@ import CreateCoursePage from "./pages/CreateCoursePage";
 import CourseDetailsPage from "./pages/CourseDetailsPage";
 import EditCoursePage from "./pages/EditCoursePage";
 import courseLoader from "./loaders/courseLoader";
+import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -47,6 +48,10 @@ const App = () => {
             <Route path="/create-course" element={<CreateCoursePage />} />
             <Route path="/view-course/:id" element={<CourseDetailsPage />} />
             <Route path="/edit-course/:id" element={<EditCoursePage />} />
+            <Route
+              path="/assignments/:assignmentId/submissions"
+              element={<AssignmentSubmissionsPage />}
+            />
           </Route>
         </Route>
       </>

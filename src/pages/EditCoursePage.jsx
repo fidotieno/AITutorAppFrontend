@@ -56,6 +56,7 @@ const EditCoursePage = () => {
         ...courseData,
         files: courseData.files.filter((file) => file._id !== fileId),
       });
+      navigate(`/view-course/${id}`);
     } else {
       toast.error("Failed to delete file.");
     }

@@ -8,46 +8,26 @@ const CourseMaterials = ({ files }) => {
   return (
     <section className="mt-6">
       <h2 className="text-xl font-semibold mb-3">Course Materials</h2>
-      <ul className="border rounded-md p-4 bg-gray-50">
+      <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-gray-50">
         {files.map((file, index) => (
-          <li
-            key={index}
-            className="flex justify-between items-center border-b py-2 last:border-none"
-          >
-            {/* File Preview */}
+          <div key={index} className="flex flex-col items-center p-3 bg-white rounded-md shadow">
             {file.type === "image" ? (
-              <img
-                src={file.url.replace("dl=0", "raw=1")} // Ensures Dropbox images load properly
-                alt={file.name}
-                className="w-32 h-32 object-cover rounded-md"
-              />
+              <img src={file.url} alt={file.name} className="w-24 h-24 object-cover rounded-md" />
             ) : file.type === "pdf" ? (
-              <a
-                href={file.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
+              <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                 📄 {file.name}
               </a>
             ) : (
-              <video controls className="w-32 h-20">
+              <video controls className="w-24 h-16">
                 <source src={file.url} type="video/mp4" />
-                Your browser does not support the video tag.
               </video>
             )}
-
-            {/* Download Button */}
-            <a
-              href={file.url}
-              download
-              className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-700"
-            >
+            <a href={file.url} target="_blank" download className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-700">
               Download
             </a>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </section>
   );
 };

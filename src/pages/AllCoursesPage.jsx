@@ -13,34 +13,31 @@ const AllCoursesPage = () => {
   const auth = useAuth();
   const studentId = auth.userId;
 
+  // Exclude courses the user is already enrolled in
   const courses = courseFormatter(
-    allCourses.courses.filter((course) => {
-      if (course.studentsEnrolled.includes(studentId)) {
-        return false;
-      }
-      return true;
-    })
+    allCourses.courses.filter((course) => !course.studentsEnrolled.includes(studentId))
   );
 
+  // Search filter (by title, instructor, or level)
   const filteredCourses = courses.filter((course) =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase())
+    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.instructor?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    course.level?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const enrollHandler = (courseId) => {
-    const enrollInCourse = async () => {
-      try {
-        const response = await enrollCourse({ courseId });
-        if (response === 200) {
-          toast.success("Enrolled successfully!");
-          navigator("/");
-        } else {
-          toast.error("Something went wrong. Please try again.");
-        }
-      } catch (error) {
-        console.error("Failed to enroll in course:", error);
+  const enrollHandler = async (courseId) => {
+    try {
+      const response = await enrollCourse({ courseId });
+      if (response === 200) {
+        toast.success("Enrolled successfully!");
+        navigator("/");
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
-    };
-    enrollInCourse();
+    } catch (error) {
+      console.error("Failed to enroll in course:", error);
+      toast.error("Enrollment failed. Please try again later.");
+    }
   };
 
   return (
@@ -50,35 +47,61 @@ const AllCoursesPage = () => {
       </h1>
 
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-6">
         <input
           type="text"
-          placeholder="Search for a course..."
+          placeholder="Search by title, instructor, or level..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-blue-200"
         />
       </div>
 
       {/* Course List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.length > 0 ? (
           filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white p-4 shadow rounded">
-              <h3 className="text-lg font-medium">{course.title}</h3>
-              <p className="text-sm text-gray-600">
-                Instructor: {course.instructor}
-              </p>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 mt-2 rounded hover:bg-blue-600 hover:cursor-pointer"
-                onClick={() => enrollHandler(course.id)}
-              >
-                Enroll
-              </button>
+            <div
+              key={course._id || course.id}
+              className="bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl"
+            >
+              {/* Course Header */}
+              <div className="p-4 bg-blue-600 text-white">
+                <h3 className="text-xl font-semibold">{course.title}</h3>
+                <p className="text-sm text-gray-200">
+                  Instructor: {course.instructor || "Unknown"}
+                </p>
+              </div>
+
+              {/* Course Details */}
+              <div className="p-4 space-y-2">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold text-gray-900">Level:</span> {course.level || "All Levels"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold text-gray-900">Duration:</span> {course.duration || "N/A"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold text-gray-900">Format:</span> {course.courseFormat || "N/A"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold text-gray-900">Students Enrolled:</span> {course.totalStudentsEnrolled || 0}
+                </p>
+              </div>
+
+              {/* Enroll Button */}
+              <div className="p-4 bg-gray-100 flex justify-center">
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition duration-200"
+                  onClick={() => enrollHandler(course._id || course.id)}
+                >
+                  Enroll
+                </button>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-gray-500">No courses found.</p>
+          <p className="text-gray-500 text-center w-full">No courses found.</p>
         )}
       </div>
     </div>

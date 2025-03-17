@@ -105,3 +105,23 @@ export const deleteAssignment = async (assignmentId) => {
   if (!res.ok) throw new Error("Failed to delete assignment.");
   return res.json();
 };
+
+export const resubmitAssignment = async (assignmentId, formData) => {
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_APP_ENVIRONMENT === "development"
+        ? `/api/assignments/${assignmentId}/resubmit`
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/assignments/${assignmentId}/resubmit`
+    }`,
+    {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: formData,
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to resubmit assignment.");
+  return res.json();
+};

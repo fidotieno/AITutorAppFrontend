@@ -10,6 +10,8 @@ import {
 import { toast } from "react-toastify";
 import CourseMaterials from "../components/CourseMaterials";
 import CourseAssignments from "../components/CourseAssignments";
+import CreateQuiz from "../components/CreateQuiz";
+import CreateExam from "../components/CreateExam";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
@@ -81,14 +83,30 @@ const CourseDetailsPage = () => {
   const tabs = [
     { key: "materials", label: "Course Materials" },
     { key: "quizzes", label: "Quizzes" },
+    { key: "exams", label: "Exams" },
     { key: "assignments", label: "Assignments" },
     { key: "students", label: "Enrolled Students" },
   ];
+
+  console.log(courseData);
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md mt-5">
       <h1 className="text-3xl font-bold text-blue-600">{courseData.title}</h1>
       <p className="text-gray-700 mt-2">{courseData.description}</p>
+
+      {/* Additional Course Information */}
+      <div className="mt-4">
+        <p className="text-gray-600">
+          <strong>Instructor:</strong> {courseData.teacherId?.name}
+        </p>
+        <p className="text-gray-600">
+          <strong>Category:</strong> {courseData.courseFormat}
+        </p>
+        <p className="text-gray-600">
+          <strong>Duration:</strong> {courseData.duration} hours
+        </p>
+      </div>
 
       {/* Enrollment Button */}
       {auth.role === "student" && (
@@ -126,9 +144,8 @@ const CourseDetailsPage = () => {
         {activeTab === "materials" && (
           <CourseMaterials files={courseData.files} />
         )}
-        {activeTab === "quizzes" && (
-          <p className="text-gray-500">Quizzes section coming soon...</p>
-        )}
+        {activeTab === "quizzes" && <CreateQuiz courseId={id} />}
+        {activeTab === "exams" && <CreateExam courseId={id} />}
         {activeTab === "assignments" && <CourseAssignments courseId={id} />}
         {activeTab === "students" && (
           <section>

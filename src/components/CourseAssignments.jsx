@@ -4,6 +4,7 @@ import {
   createAssignment,
   getAssignments,
   submitAssignment,
+  resubmitAssignment,
   deleteAssignment,
 } from "../api/AssignmentApis";
 import { useAuth } from "../auth/AuthProvider";
@@ -18,7 +19,7 @@ const CourseAssignments = ({ courseId }) => {
     description: "",
     dueDate: "",
   });
-  const [selectedFiles, setSelectedFiles] = useState({}); // Track files per assignment
+  const [selectedFiles, setSelectedFiles] = useState({});
 
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -40,7 +41,6 @@ const CourseAssignments = ({ courseId }) => {
       toast.success("Assignment created successfully!");
       setNewAssignment({ title: "", description: "", dueDate: "" });
 
-      // Refresh assignments
       const data = await getAssignments(courseId);
       setAssignments(data.assignments || []);
     } catch (error) {
@@ -64,7 +64,6 @@ const CourseAssignments = ({ courseId }) => {
       toast.success("Assignment submitted successfully!");
       setSelectedFiles({ ...selectedFiles, [assignmentId]: null });
 
-      // Refresh assignments to update status
       const data = await getAssignments(courseId);
       setAssignments(data.assignments || []);
     } catch (error) {
@@ -72,15 +71,31 @@ const CourseAssignments = ({ courseId }) => {
     }
   };
 
+  const handleResubmitAssignment = async (assignmentId) => {
+    const file = selectedFiles[assignmentId];
+    if (!file) return toast.error("Please select a file.");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await resubmitAssignment(assignmentId, formData);
+      toast.success("Assignment resubmitted successfully!");
+
+      const data = await getAssignments(courseId);
+      setAssignments(data.assignments || []);
+    } catch (error) {
+      toast.error("Failed to resubmit assignment.");
+    }
+  };
+
   const handleDeleteAssignment = async (assignmentId) => {
-    if (!window.confirm("Are you sure you want to delete this assignment?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this assignment?")) return;
 
     try {
       await deleteAssignment(assignmentId);
       toast.success("Assignment deleted successfully!");
 
-      // Refresh assignments after deletion
       const data = await getAssignments(courseId);
       setAssignments(data.assignments || []);
     } catch (error) {
@@ -150,21 +165,25 @@ const CourseAssignments = ({ courseId }) => {
               <p className="text-sm text-gray-400">
                 Due: {new Date(assignment.dueDate).toLocaleDateString()}
               </p>
-              <p
-                className={`text-sm font-medium ${
-                  assignment.submitted ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {auth.role === "student" && (
-                  <p
-                    className={`text-sm font-medium ${
-                      assignment.submitted ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {assignment.submitted ? "Submitted" : "Pending"}
+              {auth.role === "student" && (
+                <p
+                  className={`text-sm font-medium ${
+                    assignment.submitted ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {assignment.submitted ? "Submitted" : "Pending"}
+                </p>
+              )}
+              {auth.role === "student" && assignment.grade && (
+                <div className="mt-2 p-2 bg-gray-100 rounded-md">
+                  <p className="text-sm font-semibold text-blue-600">
+                    Grade: {assignment.grade}%
                   </p>
-                )}
-              </p>
+                  <p className="text-sm text-gray-700">
+                    Feedback: {assignment.feedback || "No feedback provided."}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Students can submit assignments */}
@@ -179,31 +198,46 @@ const CourseAssignments = ({ courseId }) => {
                 />
                 <button
                   onClick={() => handleSubmitAssignment(assignment._id)}
-                  className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-700"
+                  className="px-3 py-1 bg-green-500 text-white rounded-md text-sm hover:bg-green-600"
                 >
                   Submit Assignment
                 </button>
               </div>
             )}
 
-            {/* Teachers can view submissions */}
-            {auth.role === "teacher" && (
-              <button
-                onClick={() =>
-                  navigate(`/assignments/${assignment._id}/submissions`)
-                }
-                className="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
-              >
-                View Submissions
-              </button>
+            {/* Students can resubmit before grading */}
+            {auth.role === "student" && assignment.submitted && !assignment.grade && (
+              <div className="flex flex-col space-y-2">
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(assignment._id, e.target.files[0])}
+                  className="p-2 border rounded-md"
+                />
+                <button
+                  onClick={() => handleResubmitAssignment(assignment._id)}
+                  className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-700"
+                >
+                  Resubmit Assignment
+                </button>
+              </div>
             )}
+
+            {/* Teachers can view submissions or delete assignments */}
             {auth.role === "teacher" && (
-              <button
-                onClick={() => handleDeleteAssignment(assignment._id)}
-                className="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600"
-              >
-                Delete
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => navigate(`/assignments/${assignment._id}/submissions`)}
+                  className="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
+                >
+                  View Submissions
+                </button>
+                <button
+                  onClick={() => handleDeleteAssignment(assignment._id)}
+                  className="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             )}
           </li>
         ))}

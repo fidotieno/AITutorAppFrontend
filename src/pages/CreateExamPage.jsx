@@ -2,8 +2,10 @@ import { useState } from "react";
 import { createExam } from "../api/ExamApis";
 import { useAuth } from "../auth/AuthProvider";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
-const CreateExam = ({ courseId }) => {
+const CreateExamPage = () => {
+  const { courseId } = useParams();
   const auth = useAuth();
   const [examData, setExamData] = useState({
     title: "",
@@ -148,4 +150,4 @@ const CreateExam = ({ courseId }) => {
   );
 };
 
-export default CreateExam;
+export default CreateExamPage;

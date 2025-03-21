@@ -2,8 +2,10 @@ import { useState } from "react";
 import { createQuiz } from "../api/QuizApis";
 import { useAuth } from "../auth/AuthProvider";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
-const CreateQuiz = ({ courseId }) => {
+const CreateQuiz = () => {
+  const { courseId } = useParams();
   const auth = useAuth();
   const [quizData, setQuizData] = useState({
     title: "",

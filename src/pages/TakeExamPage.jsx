@@ -1,58 +1,63 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getQuiz, submitQuiz } from "../api/QuizApis";
+import { getExam, submitExam } from "../api/ExamApis";
 import { useAuth } from "../auth/AuthProvider";
 import { toast } from "react-toastify";
 
-const TakeQuiz = () => {
-  const { quizId } = useParams();
+const TakeExamPage = () => {
+  const { examId } = useParams();
   const auth = useAuth();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState(null);
-  const [answers, setAnswers] = useState({});
+  const [exam, setExam] = useState(null);
+  const [answers, setAnswers] = useState([]); // Store answers as an array
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchQuiz = async () => {
+    const fetchExam = async () => {
       try {
-        const data = await getQuiz(quizId);
-        setQuiz(data);
+        const data = await getExam(examId);
+        setExam(data.exam);
       } catch (error) {
-        toast.error("Failed to load quiz.");
+        toast.error("Failed to load exam.");
       }
     };
 
-    fetchQuiz();
-  }, [quizId]);
+    fetchExam();
+  }, [examId]);
 
   const handleAnswerChange = (questionId, value) => {
-    setAnswers({ ...answers, [questionId]: value });
+    setAnswers((prevAnswers) => {
+      const updatedAnswers = prevAnswers.filter((ans) => ans.questionId !== questionId);
+      return [...updatedAnswers, { questionId, response: value }];
+    });
   };
 
   const handleSubmit = async () => {
-    if (Object.keys(answers).length !== quiz.questions.length) {
+    if (answers.length !== exam.questions.length) {
       return toast.error("Please answer all questions before submitting.");
     }
 
     setIsSubmitting(true);
     try {
-      await submitQuiz(quizId, { answers });
-      toast.success("Quiz submitted successfully!");
-      navigate(`/quiz/${quizId}/results`);
+      const status = await submitExam(examId, { answers });
+      if (status === 201) {
+        toast.success("Exam submitted successfully!");
+        // navigate(`/exam/${examId}/results`);
+      }
     } catch (error) {
-      toast.error("Failed to submit quiz.");
+      toast.error("Failed to submit exam.");
     }
     setIsSubmitting(false);
   };
 
-  if (!quiz) return <p>Loading quiz...</p>;
+  if (!exam) return <p>Loading exam...</p>;
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h1 className="text-2xl font-bold mb-4">{quiz.title}</h1>
-      <p className="text-gray-600 mb-4">{quiz.description}</p>
+      <h1 className="text-2xl font-bold mb-4">{exam.title}</h1>
+      <p className="text-gray-600 mb-4">{exam.description}</p>
 
-      {quiz.questions.map((q) => (
+      {exam.questions.map((q) => (
         <div key={q._id} className="mb-4">
           <p className="font-semibold">{q.questionText}</p>
           {q.type === "multiple-choice" ? (
@@ -84,10 +89,10 @@ const TakeQuiz = () => {
         disabled={isSubmitting}
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
       >
-        {isSubmitting ? "Submitting..." : "Submit Quiz"}
+        {isSubmitting ? "Submitting..." : "Submit Exam"}
       </button>
     </div>
   );
 };
 
-export default TakeQuiz;
+export default TakeExamPage;

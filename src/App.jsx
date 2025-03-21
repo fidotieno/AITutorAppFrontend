@@ -21,6 +21,16 @@ import AllCoursesPage from "./pages/AllCoursesPage";
 import CreateCoursePage from "./pages/CreateCoursePage";
 import CourseDetailsPage from "./pages/CourseDetailsPage";
 import EditCoursePage from "./pages/EditCoursePage";
+import CreateQuizPage from "./pages/CreateQuizPage";
+import EditQuizPage from "./pages/EditQuizPage";
+import TakeQuizPage from "./pages/TakeQuizPage";
+import TeacherQuizViewPage from "./pages/TeacherQuizViewPage";
+import StudentViewQuizResultsPage from "./pages/StudentViewQuizResultsPage";
+import CreateExamPage from "./pages/CreateExamPage";
+import EditExamPage from "./pages/EditExamPage";
+import TakeExamPage from "./pages/TakeExamPage";
+import TeacherExamViewPage from "./pages/TeacherExamViewPage";
+import StudentViewExamResultsPage from "./pages/StudentViewExamResultsPage";
 import courseLoader from "./loaders/courseLoader";
 import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
 
@@ -53,6 +63,31 @@ const App = () => {
               element={<AssignmentSubmissionsPage />}
             />
           </Route>
+          <Route
+            path="/quizzes/create/:courseId"
+            element={<CreateQuizPage />}
+          />
+          <Route path="/quizzes/edit/:quizId" element={<EditQuizPage />} />
+          <Route path="/quizzes/take/:quizId" element={<TakeQuizPage />} />
+          <Route
+            path="/quizzes/grade/:quizId"
+            element={<TeacherQuizViewPage />}
+          />
+          <Route
+            path="/quizzes/view/:quizId"
+            element={<StudentViewQuizResultsPage />}
+          />
+          <Route path="/exams/create/:courseId" element={<CreateExamPage />} />
+          <Route path="/exams/edit/:examId" element={<EditExamPage />} />
+          <Route path="/exams/take/:examId" element={<TakeExamPage />} />
+          <Route
+            path="/exams/grade/:examId"
+            element={<TeacherExamViewPage />}
+          />
+          <Route
+            path="/exams/view/:examId"
+            element={<StudentViewExamResultsPage />}
+          />
         </Route>
       </>
     )

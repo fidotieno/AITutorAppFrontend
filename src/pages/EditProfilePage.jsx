@@ -7,7 +7,10 @@ import avatar from "../images/avatar-default.png";
 const EditProfilePage = () => {
   const [name, setName] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
-  const [preview, setPreview] = useState(null); // For displaying the new uploaded image
+  const [preview, setPreview] = useState(null);
+  const [parentEmail1, setParentEmail1] = useState("");
+  const [parentEmail2, setParentEmail2] = useState("");
+  const [role, setRole] = useState(""); // Store user role
 
   const navigate = useNavigate();
   const auth = useAuth();
@@ -20,6 +23,9 @@ const EditProfilePage = () => {
       setProfilePicture(
         userData.user.profilePhoto.url?.replace("dl=0", "raw=1") || avatar
       );
+      setRole(userData.user.role || ""); // Assuming role is returned
+      setParentEmail1(userData.user.parentEmail1 || "");
+      setParentEmail2(userData.user.parentEmail2 || "");
     };
 
     fetchUserData();
@@ -29,7 +35,7 @@ const EditProfilePage = () => {
     const file = e.target.files[0];
     if (file) {
       setPreview(URL.createObjectURL(file));
-      setProfilePicture(file); // Store the file for upload
+      setProfilePicture(file);
     }
   };
 
@@ -40,6 +46,12 @@ const EditProfilePage = () => {
     formData.append("name", name);
     if (profilePicture instanceof File) {
       formData.append("file", profilePicture);
+    }
+    
+    // Only include parent emails if the user is a student
+    if (role === "student") {
+      formData.append("parentEmail1", parentEmail1);
+      formData.append("parentEmail2", parentEmail2);
     }
 
     const response = await auth.editUserProfile(formData);
@@ -90,6 +102,30 @@ const EditProfilePage = () => {
               onChange={handleImageChange}
             />
           </div>
+
+          {/* Parent Emails (Only for Students) */}
+          {role === "student" && (
+            <>
+              <div className="mb-4">
+                <label className="block text-gray-700">Parent Email 1</label>
+                <input
+                  type="email"
+                  className="w-full p-2 border rounded-md"
+                  value={parentEmail1}
+                  onChange={(e) => setParentEmail1(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Parent Email 2</label>
+                <input
+                  type="email"
+                  className="w-full p-2 border rounded-md"
+                  value={parentEmail2}
+                  onChange={(e) => setParentEmail2(e.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <button
             type="submit"

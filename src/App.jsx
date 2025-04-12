@@ -33,6 +33,7 @@ import TeacherExamViewPage from "./pages/TeacherExamViewPage";
 import StudentViewExamResultsPage from "./pages/StudentViewExamResultsPage";
 import courseLoader from "./loaders/courseLoader";
 import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
+import StudentAnalyticsDashboardPage from "./pages/StudentAnalyticsDashboard";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -87,6 +88,10 @@ const App = () => {
           <Route
             path="/exams/view/:examId"
             element={<StudentViewExamResultsPage />}
+          />
+          <Route
+            path="/student/analytics"
+            element={<StudentAnalyticsDashboardPage />}
           />
         </Route>
       </>

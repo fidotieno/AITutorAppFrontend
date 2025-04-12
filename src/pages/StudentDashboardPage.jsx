@@ -1,4 +1,5 @@
 import CourseCard from "../components/CourseCard";
+import AnalyticsDashboard from "../pages/StudentAnalyticsDashboard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,6 +10,7 @@ const StudentDashboard = ({ courses }) => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
   const [showAllEnrolled, setShowAllEnrolled] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false); // Toggle state for analytics
 
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
@@ -63,7 +65,9 @@ const StudentDashboard = ({ courses }) => {
   // Filter out enrolled courses from available courses
   const availableCoursesToDisplay = availableCourses.filter(
     (availableCourse) =>
-      !enrolledCourses.some((enrolledCourse) => enrolledCourse.id === availableCourse.id)
+      !enrolledCourses.some(
+        (enrolledCourse) => enrolledCourse.id === availableCourse.id
+      )
   );
 
   return (
@@ -71,7 +75,15 @@ const StudentDashboard = ({ courses }) => {
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">
         🎓 Student Dashboard
       </h1>
-
+      {/* Toggle Analytics */}
+      <button
+        onClick={() => setShowAnalytics(!showAnalytics)}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-md"
+      >
+        {showAnalytics ? "Hide Analytics" : "View Analytics"}
+      </button>
+      {showAnalytics && <AnalyticsDashboard />}{" "}
+      {/* Conditionally render analytics */}
       {/* Enrolled Courses */}
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">My Courses</h2>
@@ -92,7 +104,6 @@ const StudentDashboard = ({ courses }) => {
           </button>
         )}
       </section>
-
       {/* Available Courses */}
       <section>
         <h2 className="text-xl font-semibold mb-2">Available Courses</h2>

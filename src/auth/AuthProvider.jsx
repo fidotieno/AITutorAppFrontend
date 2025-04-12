@@ -47,6 +47,11 @@ const AuthProvider = ({ children }) => {
         setUserName(res.user.name);
         setRole(res.user.role);
         setToken(res.token);
+        setUserId(res.user._id);
+
+        if (res.children) {
+          localStorage.setItem("children", JSON.stringify(res.children));
+        }
 
         // Store in localStorage for persistence
         localStorage.setItem("userName", res.user.name);
@@ -106,6 +111,7 @@ const AuthProvider = ({ children }) => {
     localStorage.removeItem("userId");
     localStorage.removeItem("role");
     localStorage.removeItem("token");
+    localStorage.removeItem("children");
 
     return 0;
   };
@@ -149,6 +155,27 @@ const AuthProvider = ({ children }) => {
     return res.status;
   };
 
+  const getUsers = async (userType) => {
+    const res = await fetch(
+      import.meta.env.VITE_APP_ENVIRONMENT === "development"
+        ? `/api/api/users/all?role=${
+            userType === "parent" ? "teacher" : "parent"
+          }`
+        : `${import.meta.env.VITE_APP_BACKEND_URL}/api/users/all?role=${
+            userType === "parent" ? "teacher" : "parent"
+          }`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await res.json();
+    return data;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -163,6 +190,7 @@ const AuthProvider = ({ children }) => {
         logout,
         getUserProfile,
         editUserProfile,
+        getUsers,
       }}
     >
       {children}

@@ -31,20 +31,32 @@ const ViewQuizResultsPage = () => {
     };
 
     fetchQuiz();
-  }, [quizId, auth.user]);
+  }, [quizId, auth.userId]);
 
   if (loading) return <p>Loading quiz results...</p>;
   if (!submission) return <p>You have not taken this quiz yet.</p>;
+
+  // Calculate total points available
+  const totalPoints = quiz.questions.reduce(
+    (acc, q) => acc + (q.points || 1),
+    0
+  );
+  const percentageScore = ((submission.score / totalPoints) * 100).toFixed(2);
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h1 className="text-2xl font-bold mb-4">{quiz.title} - Results</h1>
       <p className="text-gray-600 mb-4">{quiz.description}</p>
-      <p className="text-lg font-semibold">Your Score: {submission.score}</p>
+
+      <p className="text-lg font-semibold mb-2">
+        Your Score: {submission.score} / {totalPoints} Points
+      </p>
+      <p className="text-md text-blue-600 mb-4">({percentageScore}%)</p>
+
       {submission.feedback && (
-        <p className="text-gray-700 mt-2">
-          <strong>Feedback:</strong> {submission.feedback}
-        </p>
+        <div className="bg-yellow-100 text-yellow-800 p-3 rounded-md mb-4">
+          <strong>Overall Feedback:</strong> {submission.feedback}
+        </div>
       )}
 
       {/* Display Questions & Answers */}
@@ -56,15 +68,28 @@ const ViewQuizResultsPage = () => {
 
           return (
             <li key={question._id} className="p-4 bg-gray-100 rounded-md">
-              <p className="font-medium">{question.questionText}</p>
+              <div className="flex justify-between items-center mb-1">
+                <p className="font-semibold">{question.questionText}</p>
+                <span className="text-sm text-blue-600">
+                  {question.points || 1} pts
+                </span>
+              </div>
+
               <p className="text-sm text-gray-700">
                 <strong>Your Answer:</strong>{" "}
                 {studentAnswer?.response || "No answer provided"}
               </p>
+
               {question.type === "multiple-choice" && (
                 <p className="text-sm text-green-600">
                   <strong>Correct Answer:</strong> {question.correctAnswer}
                 </p>
+              )}
+
+              {question.type === "open-ended" && studentAnswer?.feedback && (
+                <div className="text-sm text-gray-700 mt-2">
+                  <strong>AI Feedback:</strong> {studentAnswer.feedback}
+                </div>
               )}
             </li>
           );

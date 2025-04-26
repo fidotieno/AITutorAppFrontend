@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 const TeacherQuizViewPage = () => {
   const { quizId } = useParams();
   const [submissions, setSubmissions] = useState([]);
-  const [quizQuestions, setQuizQuestions] = useState([]); // Store questions
+  const [quizQuestions, setQuizQuestions] = useState([]);
   const [grading, setGrading] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -14,12 +14,12 @@ const TeacherQuizViewPage = () => {
     const fetchSubmissions = async () => {
       try {
         const [submissionsData, quizData] = await Promise.all([
-          getQuizResults(quizId), // Fetch student submissions
-          getQuiz(quizId), // Fetch quiz questions
+          getQuizResults(quizId),
+          getQuiz(quizId),
         ]);
 
         setSubmissions(submissionsData.submissions || []);
-        setQuizQuestions(quizData.quiz.questions || []); // Store questions
+        setQuizQuestions(quizData.quiz.questions || []);
         setLoading(false);
       } catch (error) {
         toast.error("Failed to load quiz data.");
@@ -57,7 +57,6 @@ const TeacherQuizViewPage = () => {
       await gradeQuizSubmission(quizId, studentId, { grades, feedback });
       toast.success("Grades submitted successfully!");
 
-      // Update the submissions list to mark the quiz as graded
       setSubmissions((prev) =>
         prev.map((sub) =>
           sub.studentId._id === studentId ? { ...sub, graded: true } : sub
@@ -85,22 +84,40 @@ const TeacherQuizViewPage = () => {
 
             <ul className="list-disc pl-4">
               {submission.answers.map((answer) => {
-                const question = quizQuestions.find((q) => q._id === answer.questionId);
+                const question = quizQuestions.find(
+                  (q) => q._id === answer.questionId
+                );
                 return (
                   <li key={answer.questionId} className="mb-4">
-                    <p className="font-medium">{question?.questionText || "Question not found"}</p>
+                    <p className="font-medium">
+                      {question?.questionText || "Question not found"}
+                      {question?.points && (
+                        <span className="text-sm text-gray-500 ml-2">
+                          ({question.points} pts)
+                        </span>
+                      )}
+                    </p>
                     <p className="text-gray-600">Answer: {answer.response}</p>
+
                     {question?.type === "open-ended" && !submission.graded && (
-                      <div className="mt-2">
+                      <div className="mt-2 flex items-center gap-2">
                         <input
                           type="number"
                           placeholder="Grade"
                           min="0"
+                          max={question?.points || 1}
                           className="w-20 p-2 border rounded-md"
                           onChange={(e) =>
-                            handleGradeChange(submission.studentId._id, answer.questionId, Number(e.target.value))
+                            handleGradeChange(
+                              submission.studentId._id,
+                              answer.questionId,
+                              Number(e.target.value)
+                            )
                           }
                         />
+                        <span className="text-xs text-gray-500">
+                          / {question?.points || 1}
+                        </span>
                       </div>
                     )}
                   </li>
@@ -109,15 +126,20 @@ const TeacherQuizViewPage = () => {
             </ul>
 
             {!submission.graded && (
-              <div className="mt-2">
+              <div className="mt-4">
                 <textarea
                   placeholder="Feedback (optional)"
                   className="w-full p-2 border rounded-md"
-                  onChange={(e) => handleFeedbackChange(submission.studentId._id, e.target.value)}
+                  onChange={(e) =>
+                    handleFeedbackChange(
+                      submission.studentId._id,
+                      e.target.value
+                    )
+                  }
                 />
                 <button
                   onClick={() => handleSubmitGrades(submission.studentId._id)}
-                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md"
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                 >
                   Submit Grades
                 </button>

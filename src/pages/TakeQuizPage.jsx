@@ -27,7 +27,9 @@ const TakeQuizPage = () => {
 
   const handleAnswerChange = (questionId, value) => {
     setAnswers((prevAnswers) => {
-      const updatedAnswers = prevAnswers.filter((ans) => ans.questionId !== questionId);
+      const updatedAnswers = prevAnswers.filter(
+        (ans) => ans.questionId !== questionId
+      );
       return [...updatedAnswers, { questionId, response: value }];
     });
   };
@@ -58,10 +60,21 @@ const TakeQuizPage = () => {
       <p className="text-gray-600 mb-4">{quiz.description}</p>
 
       {quiz.questions.map((q) => (
-        <div key={q._id} className="mb-4">
-          <p className="font-semibold">{q.questionText}</p>
+        <div
+          key={q._id}
+          className="mb-6 p-4 border rounded-lg bg-gray-50 relative"
+        >
+          {/* Points badge */}
+          <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+            {q.points || 1} {q.points === 1 ? "Point" : "Points"}
+          </div>
+
+          {/* Question Text */}
+          <p className="font-semibold mb-3">{q.questionText}</p>
+
+          {/* Question Input */}
           {q.type === "multiple-choice" ? (
-            <div className="flex flex-col">
+            <div className="flex flex-col space-y-2">
               {q.options.map((option, index) => (
                 <label key={index} className="flex items-center space-x-2">
                   <input
@@ -69,6 +82,7 @@ const TakeQuizPage = () => {
                     name={q._id}
                     value={option}
                     onChange={(e) => handleAnswerChange(q._id, e.target.value)}
+                    className="text-blue-600"
                   />
                   <span>{option}</span>
                 </label>
@@ -76,7 +90,7 @@ const TakeQuizPage = () => {
             </div>
           ) : (
             <textarea
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border rounded-md mt-2"
               placeholder="Your answer..."
               onChange={(e) => handleAnswerChange(q._id, e.target.value)}
             />

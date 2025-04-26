@@ -12,11 +12,13 @@ const CreateQuiz = () => {
     description: "",
     questions: [],
   });
+
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
     type: "multiple-choice",
-    options: ["", "", "", ""], // Default 4 empty options
+    options: ["", "", "", ""],
     correctAnswer: "",
+    points: 1, // Default 1 point
   });
 
   const handleQuestionChange = (index, value) => {
@@ -29,6 +31,9 @@ const CreateQuiz = () => {
     if (!newQuestion.questionText.trim())
       return toast.error("Question text is required.");
 
+    if (newQuestion.points <= 0)
+      return toast.error("Points must be greater than zero.");
+
     const question = { ...newQuestion };
     if (question.type === "open-ended") {
       delete question.options;
@@ -37,12 +42,12 @@ const CreateQuiz = () => {
 
     setQuizData({ ...quizData, questions: [...quizData.questions, question] });
 
-    // Reset new question input
     setNewQuestion({
       questionText: "",
       type: "multiple-choice",
       options: ["", "", "", ""],
       correctAnswer: "",
+      points: 1,
     });
   };
 
@@ -63,6 +68,7 @@ const CreateQuiz = () => {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h1 className="text-2xl font-bold mb-4">Create Quiz</h1>
+
       <input
         type="text"
         placeholder="Quiz Title"
@@ -70,6 +76,7 @@ const CreateQuiz = () => {
         onChange={(e) => setQuizData({ ...quizData, title: e.target.value })}
         className="w-full p-2 border rounded-md mb-3"
       />
+
       <textarea
         placeholder="Quiz Description"
         value={quizData.description}
@@ -80,6 +87,7 @@ const CreateQuiz = () => {
       />
 
       <h2 className="text-lg font-semibold">Add Question</h2>
+
       <input
         type="text"
         placeholder="Question text"
@@ -89,6 +97,7 @@ const CreateQuiz = () => {
         }
         className="w-full p-2 border rounded-md mb-2"
       />
+
       <select
         value={newQuestion.type}
         onChange={(e) =>
@@ -99,6 +108,18 @@ const CreateQuiz = () => {
         <option value="multiple-choice">Multiple Choice</option>
         <option value="open-ended">Open-Ended</option>
       </select>
+
+      {/* New field for Points */}
+      <input
+        type="number"
+        placeholder="Points"
+        value={newQuestion.points}
+        min={1}
+        onChange={(e) =>
+          setNewQuestion({ ...newQuestion, points: Number(e.target.value) })
+        }
+        className="w-full p-2 border rounded-md mb-2"
+      />
 
       {newQuestion.type === "multiple-choice" && (
         <div>
@@ -126,7 +147,7 @@ const CreateQuiz = () => {
 
       <button
         onClick={addQuestion}
-        className="px-4 py-2 bg-green-500 text-white rounded-md"
+        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
       >
         Add Question
       </button>
@@ -135,14 +156,15 @@ const CreateQuiz = () => {
       <ul className="list-disc pl-4">
         {quizData.questions.map((q, index) => (
           <li key={index} className="mb-2">
-            {q.questionText}
+            {q.questionText}{" "}
+            <span className="text-gray-500 text-sm">({q.points} pts)</span>
           </li>
         ))}
       </ul>
 
       <button
         onClick={handleCreateQuiz}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
       >
         Create Quiz
       </button>

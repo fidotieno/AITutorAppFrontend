@@ -1,5 +1,4 @@
 export const createQuiz = async (quizData) => {
-  console.log(quizData);
   const res = await fetch(
     import.meta.env.VITE_APP_ENVIRONMENT === "development"
       ? "/api/api/quizzes"
@@ -139,5 +138,30 @@ export const getQuizResults = async (quizId) => {
   );
 
   if (!res.ok) throw new Error("Failed to fetch quiz results.");
+  return res.json();
+};
+
+export const generateQuizQuestions = async (
+  topic,
+  numberOfQuestions,
+  difficulty
+) => {
+  const res = await fetch(
+    import.meta.env.VITE_APP_ENVIRONMENT === "development"
+      ? "/api/api/quizzes/generate-questions"
+      : `${
+          import.meta.env.VITE_APP_BACKEND_URL
+        }/api/quizzes/generate-questions`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ topic, numberOfQuestions, difficulty }),
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to generate questions.");
   return res.json();
 };

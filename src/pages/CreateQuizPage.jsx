@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createQuiz } from "../api/QuizApis";
+import { createQuiz, generateQuizQuestions } from "../api/QuizApis"; // Make sure to create this API
 import { useAuth } from "../auth/AuthProvider";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 const CreateQuiz = () => {
   const { courseId } = useParams();
   const auth = useAuth();
+
   const [quizData, setQuizData] = useState({
     title: "",
     description: "",
@@ -18,8 +19,14 @@ const CreateQuiz = () => {
     type: "multiple-choice",
     options: ["", "", "", ""],
     correctAnswer: "",
-    points: 1, // Default 1 point
+    points: 1,
   });
+
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiNumber, setAiNumber] = useState(5);
+  const [aiDifficulty, setAiDifficulty] = useState("medium");
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const handleQuestionChange = (index, value) => {
     const updatedOptions = [...newQuestion.options];
@@ -61,7 +68,41 @@ const CreateQuiz = () => {
       toast.success("Quiz created successfully!");
       setQuizData({ title: "", description: "", questions: [] });
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create quiz.");
+    }
+  };
+
+  const handleGenerateAIQuestions = async () => {
+    if (!aiTopic.trim()) return toast.error("Please enter a topic.");
+    if (aiNumber < 1 || aiNumber > 10)
+      return toast.error("Number of questions must be between 1 and 10.");
+
+    try {
+      setLoadingAI(true);
+      const generatedQuestions = await generateQuizQuestions(
+        aiTopic,
+        aiNumber,
+        aiDifficulty
+      );
+
+      const updatedQuestions = generatedQuestions.map((q) => ({
+        ...q,
+        points: 1,
+      }));
+
+      setQuizData((prev) => ({
+        ...prev,
+        questions: [...prev.questions, ...updatedQuestions],
+      }));
+
+      setShowAIModal(false);
+      toast.success("Questions generated successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate AI questions.");
+    } finally {
+      setLoadingAI(false);
     }
   };
 
@@ -86,7 +127,63 @@ const CreateQuiz = () => {
         className="w-full p-2 border rounded-md mb-3"
       />
 
-      <h2 className="text-lg font-semibold">Add Question</h2>
+      {/* AI Button */}
+      <button
+        onClick={() => setShowAIModal(true)}
+        className="mb-4 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+      >
+        Generate Questions with AI 🤖
+      </button>
+
+      {/* AI Modal */}
+      {showAIModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-md w-80">
+            <h2 className="text-lg font-bold mb-4">Generate Questions</h2>
+            <input
+              type="text"
+              placeholder="Topic"
+              value={aiTopic}
+              onChange={(e) => setAiTopic(e.target.value)}
+              className="w-full p-2 border rounded-md mb-2"
+            />
+            <input
+              type="number"
+              placeholder="Number of Questions"
+              value={aiNumber}
+              min={1}
+              max={10}
+              onChange={(e) => setAiNumber(Number(e.target.value))}
+              className="w-full p-2 border rounded-md mb-2"
+            />
+            <select
+              value={aiDifficulty}
+              onChange={(e) => setAiDifficulty(e.target.value)}
+              className="w-full p-2 border rounded-md mb-2"
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+
+            <button
+              onClick={handleGenerateAIQuestions}
+              className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition mt-2"
+              disabled={loadingAI}
+            >
+              {loadingAI ? "Generating..." : "Generate"}
+            </button>
+            <button
+              onClick={() => setShowAIModal(false)}
+              className="w-full bg-gray-400 text-white p-2 rounded-md hover:bg-gray-500 transition mt-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-lg font-semibold mt-4">Add Question</h2>
 
       <input
         type="text"
@@ -109,7 +206,6 @@ const CreateQuiz = () => {
         <option value="open-ended">Open-Ended</option>
       </select>
 
-      {/* New field for Points */}
       <input
         type="number"
         placeholder="Points"
@@ -147,7 +243,7 @@ const CreateQuiz = () => {
 
       <button
         onClick={addQuestion}
-        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mt-2"
       >
         Add Question
       </button>
@@ -164,7 +260,7 @@ const CreateQuiz = () => {
 
       <button
         onClick={handleCreateQuiz}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        className="mt-6 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
       >
         Create Quiz
       </button>

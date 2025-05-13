@@ -127,6 +127,18 @@ const EditCoursePage = () => {
             className="w-full border p-2 rounded-md focus:ring focus:ring-blue-300"
           />
 
+          <div>
+            <label className="block text-gray-700 font-medium">
+              Course Code
+            </label>
+            <input
+              type="text"
+              value={courseData.courseCode}
+              disabled
+              className="w-full border p-2 rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+            />
+          </div>
+
           <label className="block text-gray-700 font-medium">Description</label>
           <textarea
             name="description"

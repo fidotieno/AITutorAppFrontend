@@ -76,7 +76,6 @@ const RegisterPage = () => {
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
               <option value="parent">Parent</option>
-              <option value="administration">Administration</option>
             </select>
           </div>
 

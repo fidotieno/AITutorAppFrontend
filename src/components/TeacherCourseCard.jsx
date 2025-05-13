@@ -2,35 +2,45 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course }) => {
-  console.log(course.studentsEnrolled.length);
   return (
     <div className="bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl">
       {/* Card Header */}
       <div className="p-4 bg-blue-600 text-white">
         <h3 className="text-xl font-bold">{course.title}</h3>
         <p className="text-sm text-gray-200">{course.level || "All Levels"}</p>
+        <p className="text-sm text-gray-200 italic">
+          Code: {course.courseCode || "N/A"}
+        </p>
       </div>
 
       {/* Card Body */}
       <div className="p-4 space-y-2">
-        <p className="text-gray-700">{course.description || "No description available."}</p>
+        <p className="text-gray-700">
+          {course.description || "No description available."}
+        </p>
 
         {/* Course Details */}
         <div className="text-sm text-gray-600 space-y-1">
           <p>
-            <span className="font-semibold text-gray-800">Duration:</span> {course.duration || "N/A"}
+            <span className="font-semibold text-gray-800">Duration:</span>{" "}
+            {course.duration || "N/A"}
           </p>
           <p>
-            <span className="font-semibold text-gray-800">Format:</span> {course.courseFormat || "N/A"}
+            <span className="font-semibold text-gray-800">Format:</span>{" "}
+            {course.courseFormat || "N/A"}
           </p>
           {course.prerequisites && course.prerequisites.length > 0 && (
             <p>
-              <span className="font-semibold text-gray-800">Prerequisites:</span>{" "}
+              <span className="font-semibold text-gray-800">
+                Prerequisites:
+              </span>{" "}
               {course.prerequisites.join(", ")}
             </p>
           )}
           <p>
-            <span className="font-semibold text-gray-800">Students Enrolled:</span>{" "}
+            <span className="font-semibold text-gray-800">
+              Students Enrolled:
+            </span>{" "}
             {course.studentsEnrolled.length || 0}
           </p>
         </div>

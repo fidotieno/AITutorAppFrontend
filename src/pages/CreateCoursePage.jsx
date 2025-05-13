@@ -12,6 +12,7 @@ const CreateCoursePage = () => {
     prerequisites: "",
     courseFormat: "",
     objectives: "",
+    courseCode: "",
   });
 
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const CreateCoursePage = () => {
       objectives: courseData.objectives
         ? courseData.objectives.split("\n").map((o) => o.trim())
         : [],
+      courseCode: courseData.courseCode?.trim() || undefined,
     };
 
     const courseCreated = await createCourse(formattedData);
@@ -49,7 +51,9 @@ const CreateCoursePage = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Course Title */}
         <div>
-          <label className="block text-gray-700 font-medium">Course Title</label>
+          <label className="block text-gray-700 font-medium">
+            Course Title
+          </label>
           <input
             type="text"
             name="title"
@@ -120,7 +124,9 @@ const CreateCoursePage = () => {
 
         {/* Course Format */}
         <div>
-          <label className="block text-gray-700 font-medium">Course Format</label>
+          <label className="block text-gray-700 font-medium">
+            Course Format
+          </label>
           <input
             type="text"
             name="courseFormat"
@@ -134,7 +140,9 @@ const CreateCoursePage = () => {
 
         {/* Objectives */}
         <div>
-          <label className="block text-gray-700 font-medium">Objectives (one per line)</label>
+          <label className="block text-gray-700 font-medium">
+            Objectives (one per line)
+          </label>
           <textarea
             name="objectives"
             value={courseData.objectives}
@@ -143,6 +151,24 @@ const CreateCoursePage = () => {
             placeholder="e.g., Learn HTML basics\nUnderstand JavaScript fundamentals\nBuild a simple website"
             className="w-full border p-2 rounded-md focus:ring focus:ring-blue-300"
           />
+        </div>
+
+        {/* Optional Course Code */}
+        <div>
+          <label className="block text-gray-700 font-medium">
+            Course Code (optional)
+          </label>
+          <input
+            type="text"
+            name="courseCode"
+            value={courseData.courseCode}
+            onChange={handleChange}
+            placeholder="e.g., MY-CUSTOM-CODE"
+            className="w-full border p-2 rounded-md focus:ring focus:ring-blue-300"
+          />
+          <p className="text-sm text-gray-500 mt-1">
+            Leave blank to generate one automatically.
+          </p>
         </div>
 
         {/* Submit Button */}

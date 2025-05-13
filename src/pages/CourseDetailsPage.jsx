@@ -11,6 +11,7 @@ import { getQuizByCourse, deleteQuiz } from "../api/QuizApis";
 import { toast } from "react-toastify";
 import CourseMaterials from "../components/CourseMaterials";
 import CourseAssignments from "../components/CourseAssignments";
+import CourseAnalyticsDashboard from "../components/CourseAnalyticsDashboard";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
@@ -96,6 +97,7 @@ const CourseDetailsPage = () => {
     { key: "quizzes", label: "Quizzes" },
     { key: "assignments", label: "Assignments" },
     { key: "students", label: "Enrolled Students" },
+    { key: "analytics", label: "Analytics" },
   ];
 
   return (
@@ -105,6 +107,9 @@ const CourseDetailsPage = () => {
 
       {/* Additional Course Information */}
       <div className="mt-4">
+        <p className="text-gray-600">
+          <strong>Course Code:</strong> {courseData.courseCode || "N/A"}
+        </p>
         <p className="text-gray-600">
           <strong>Instructor:</strong> {courseData.teacherId?.name}
         </p>
@@ -280,6 +285,9 @@ const CourseDetailsPage = () => {
               <p className="text-gray-500">No students enrolled yet.</p>
             )}
           </section>
+        )}
+        {activeTab === "analytics" && auth.role === "teacher" && (
+          <CourseAnalyticsDashboard courseId={id} />
         )}
       </div>
 

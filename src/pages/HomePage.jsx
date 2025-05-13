@@ -1,5 +1,6 @@
 import { useAuth } from "../auth/AuthProvider";
 import StudentDashboard from "./StudentDashboardPage";
+import AdminDashboard from "./AdminDashboardPage";
 import TeacherDashboard from "./TeacherDashboardPage";
 import ParentDashboard from "./ParentDashboardPage";
 import NotLoggedInCard from "../components/NotLoggedInCard";
@@ -19,6 +20,8 @@ const HomePage = () => {
         <TeacherDashboard />
       ) : auth.role === "parent" ? (
         <ParentDashboard />
+      ) : auth.role === "admin" ? (
+        <AdminDashboard />
       ) : (
         <div className="text-center mt-10 text-gray-600">Invalid role</div>
       )}

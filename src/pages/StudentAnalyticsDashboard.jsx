@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getStudentAnalytics } from "../api/AnalyticsApis";
 import { useAuth } from "../auth/AuthProvider";
-import { Bar } from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +10,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from "chart.js";
 
 // Register necessary components for Chart.js
@@ -19,8 +20,18 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: "top" },
+    title: { display: false },
+  },
+};
 
 const AnalyticsDashboard = ({ studentCode }) => {
   const auth = useAuth();
@@ -35,7 +46,7 @@ const AnalyticsDashboard = ({ studentCode }) => {
         const response = await getStudentAnalytics(studentId);
         const data = await response.json();
 
-        setStudent(data.modifiedStudent);
+        setStudent(data.student);
         setOverallPerformance(data.overallPerformance);
         setCoursePerformance(data.coursePerformance);
       } catch (error) {
@@ -44,15 +55,18 @@ const AnalyticsDashboard = ({ studentCode }) => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [studentId]);
 
   if (!student || !overallPerformance) {
-    return <div className="text-center text-gray-500 p-6">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-12 h-12 border-4 border-blue-300 border-dashed rounded-full animate-spin border-t-blue-600"></div>
+      </div>
+    );
   }
 
-  // Chart Data
   const chartData = {
-    labels: ["Quizzes", "Exams", "Assignments"],
+    labels: ["Quizzes", "Assignments"],
     datasets: [
       {
         label: "Average Score (%)",
@@ -63,6 +77,32 @@ const AnalyticsDashboard = ({ studentCode }) => {
         backgroundColor: ["#3b82f6", "#10b981"],
       },
     ],
+  };
+
+  const pieData = {
+    labels: ["Quizzes", "Assignments"],
+    datasets: [
+      {
+        data: [
+          overallPerformance.totalQuizzes,
+          overallPerformance.totalAssignments,
+        ],
+        backgroundColor: ["#3b82f6", "#10b981"],
+        hoverOffset: 8,
+      },
+    ],
+  };
+
+  const getPerformanceBadge = (score) => {
+    if (score >= 85)
+      return <span className="text-green-600 font-bold">Excellent</span>;
+    if (score >= 70)
+      return <span className="text-yellow-600 font-semibold">Good</span>;
+    if (score > 0)
+      return (
+        <span className="text-red-600 font-medium">Needs Improvement</span>
+      );
+    return <span className="text-gray-500">No Data</span>;
   };
 
   return (
@@ -87,7 +127,27 @@ const AnalyticsDashboard = ({ studentCode }) => {
         </h2>
 
         {/* Chart for Average Scores */}
-        <Bar data={chartData} />
+        <div className="h-64">
+          <Bar
+            key={`bar-${studentId}`}
+            data={chartData}
+            options={chartOptions}
+          />
+        </div>
+
+        {/* Pie Chart */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            Activity Distribution
+          </h3>
+          <div className="h-64 max-w-sm mx-auto">
+            <Pie
+              key={`pie-${studentId}`}
+              data={pieData}
+              options={chartOptions}
+            />
+          </div>
+        </div>
 
         {/* Performance Stats */}
         <div className="mt-4 grid grid-cols-2 gap-4">
@@ -106,7 +166,7 @@ const AnalyticsDashboard = ({ studentCode }) => {
           <p className="font-bold text-gray-800">
             Overall Average Score:{" "}
             <span className="text-blue-600">
-              {overallPerformance.averageScore ?? "N/A"}%
+              {overallPerformance.averageScore?.toFixed(1) ?? "N/A"}%
             </span>
           </p>
         </div>
@@ -125,7 +185,6 @@ const AnalyticsDashboard = ({ studentCode }) => {
                   {course.courseName}
                 </p>
 
-                {/* Progress Bars */}
                 <div className="mt-2">
                   <p className="text-gray-600">
                     Quiz Scores: {course.quizScores.length}
@@ -153,8 +212,11 @@ const AnalyticsDashboard = ({ studentCode }) => {
                 <p className="text-gray-800 font-bold mt-3">
                   Overall Course Score:{" "}
                   <span className="text-green-700">
-                    {course.averageScore ?? "N/A"}%
+                    {course.averageScore?.toFixed(1) ?? "N/A"}%
                   </span>
+                </p>
+                <p className="mt-1 text-sm">
+                  Status: {getPerformanceBadge(course.averageScore)}
                 </p>
               </li>
             ))}
@@ -168,3 +230,4 @@ const AnalyticsDashboard = ({ studentCode }) => {
 };
 
 export default AnalyticsDashboard;
+ 

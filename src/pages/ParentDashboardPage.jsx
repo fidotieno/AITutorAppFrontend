@@ -6,6 +6,8 @@ const ParentDashboard = () => {
   const auth = useAuth();
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [amount, setAmount] = useState("");
 
   useEffect(() => {
     // Load children from localStorage or fetch from API
@@ -43,6 +45,50 @@ const ParentDashboard = () => {
             <AnalyticsDashboard studentCode={selectedChild._id} />
           )}{" "}
           {/* Render student dashboard */}
+          {selectedChild && (
+            <div className="mt-6 p-4 border rounded shadow bg-white">
+              <h2 className="text-xl font-semibold mb-4">
+                💰 Pay Fees via M-Pesa
+              </h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const res = await initiateStkPush({
+                    phone,
+                    amount,
+                    studentId: selectedChild._id,
+                    token: auth.token,
+                  });
+
+                  if (res.success) {
+                    alert("Payment initiated! Please check your phone.");
+                  } else {
+                    alert("Payment failed. Try again.");
+                  }
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Safaricom Phone (e.g. 2547... )"
+                  className="block w-full p-2 border rounded mb-2"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  className="block w-full p-2 border rounded mb-2"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                />
+                <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                  Pay Now
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-gray-500 mt-4">No linked students found.</p>

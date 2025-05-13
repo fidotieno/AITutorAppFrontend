@@ -1,27 +1,157 @@
-import { FaSignOutAlt } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaSignOutAlt, FaBell } from "react-icons/fa";
 import { useAuth } from "../auth/AuthProvider";
 import { useNavigate, Link } from "react-router-dom";
+import {
+  fetchUnreadCount,
+  fetchNotifications,
+  markNotificationAsRead,
+} from "../api/NotificationApis";
 
 const Navbar = () => {
   const auth = useAuth();
   const navigator = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const isStudent = auth?.role === "student";
+
+  useEffect(() => {
+    let intervalId;
+
+    if (auth.token && isStudent) {
+      loadUnreadCount();
+
+      // Refresh unread count every 60 seconds (you can adjust the interval)
+      intervalId = setInterval(() => {
+        loadUnreadCount();
+      }, 60000);
+    }
+
+    // Cleanup on unmount or when auth.token changes
+    return () => clearInterval(intervalId);
+  }, [auth.token, isStudent]);
+
+  const loadUnreadCount = async () => {
+    try {
+      const data = await fetchUnreadCount(auth.token);
+      setUnreadCount(data.unreadCount);
+    } catch (error) {
+      console.error("Failed to load unread count", error);
+    }
+  };
+
+  const loadNotifications = async () => {
+    try {
+      const data = await fetchNotifications(auth.token);
+      setNotifications(data);
+    } catch (error) {
+      console.error("Failed to load notifications", error);
+    }
+  };
+
+  const handleBellClick = () => {
+    if (!showDropdown) {
+      loadNotifications();
+    }
+    setShowDropdown((prev) => !prev);
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await markNotificationAsRead(id, auth.token);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+    } catch (error) {
+      console.error("Failed to mark as read", error);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <nav className="bg-blue-500 text-white p-4 flex justify-between items-center shadow-md">
+    <nav className="bg-blue-500 text-white p-4 flex justify-between items-center shadow-md relative">
       <Link
         to="/"
         className="text-xl font-semibold hover:text-gray-300 transition duration-300"
       >
         EduTech
       </Link>
+
       {auth.token && (
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 relative">
+          {isStudent && (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={handleBellClick}
+                className="relative hover:text-gray-300 transition duration-300"
+              >
+                <FaBell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded shadow-lg z-50 max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="p-4 text-sm text-gray-600">
+                      No notifications.
+                    </p>
+                  ) : (
+                    <ul>
+                      {notifications.map((n) => (
+                        <li
+                          key={n._id}
+                          className={`p-3 border-b hover:bg-gray-100 ${
+                            !n.isRead ? "bg-blue-100" : ""
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">{n.content}</span>
+                            {!n.isRead && (
+                              <button
+                                onClick={() => handleMarkAsRead(n._id)}
+                                className="text-xs text-blue-600 hover:underline ml-2"
+                              >
+                                Mark as read
+                              </button>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(n.createdAt).toLocaleString()}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <Link
             to="/view-profile"
             className="hover:text-gray-300 transition duration-300"
           >
             My Profile
           </Link>
+
           <button
             onClick={() => {
               auth.logout();

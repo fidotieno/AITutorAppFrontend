@@ -6,7 +6,12 @@ const CourseCard = ({ course, isEnrolled, onEnroll }) => {
       {/* Card Header */}
       <div className="p-4 bg-blue-600 text-white">
         <h3 className="text-xl font-bold">{course.title}</h3>
-        <p className="text-sm text-gray-200">Instructor: {course.instructor || course.teacherId?.name || "Unknown"}</p>
+        <p className="text-sm text-gray-200">
+          Instructor: {course.instructor || course.teacherId?.name || "Unknown"}
+        </p>
+        <p className="text-sm text-gray-200 italic">
+          Code: {course.courseCode || "N/A"}
+        </p>
       </div>
 
       {/* Card Body */}
@@ -14,16 +19,22 @@ const CourseCard = ({ course, isEnrolled, onEnroll }) => {
         {/* Course Details */}
         <div className="text-sm text-gray-700 space-y-1">
           <p>
-            <span className="font-semibold text-gray-900">Level:</span> {course.level || "All Levels"}
+            <span className="font-semibold text-gray-900">Level:</span>{" "}
+            {course.level || "All Levels"}
           </p>
           <p>
-            <span className="font-semibold text-gray-900">Duration:</span> {course.duration || "N/A"}
+            <span className="font-semibold text-gray-900">Duration:</span>{" "}
+            {course.duration || "N/A"}
           </p>
           <p>
-            <span className="font-semibold text-gray-900">Format:</span> {course.courseFormat || "N/A"}
+            <span className="font-semibold text-gray-900">Format:</span>{" "}
+            {course.courseFormat || "N/A"}
           </p>
           <p>
-            <span className="font-semibold text-gray-900">Students Enrolled:</span> {course.studentsEnrolled || 0}
+            <span className="font-semibold text-gray-900">
+              Students Enrolled:
+            </span>{" "}
+            {course.studentsEnrolled || 0}
           </p>
         </div>
       </div>

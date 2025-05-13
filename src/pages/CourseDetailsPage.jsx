@@ -11,7 +11,6 @@ import { getQuizByCourse, deleteQuiz } from "../api/QuizApis";
 import { toast } from "react-toastify";
 import CourseMaterials from "../components/CourseMaterials";
 import CourseAssignments from "../components/CourseAssignments";
-import { getExamByCourse, deleteExam } from "../api/ExamApis";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
@@ -21,16 +20,13 @@ const CourseDetailsPage = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("materials"); // Default tab
   const [quizzes, setQuizzes] = useState([]);
-  const [exams, setExams] = useState([]);
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
         const data = await getCourse(id);
-        const examData = await getExamByCourse(id);
         const quizData = await getQuizByCourse(id);
         setCourseData(data);
-        setExams(examData || []);
         setQuizzes(quizData || []);
         if (auth.userId) {
           setIsEnrolled(
@@ -90,19 +86,6 @@ const CourseDetailsPage = () => {
     }
   };
 
-  const handleDeleteExam = async (examId) => {
-    if (!window.confirm("Are you sure you want to delete this exam?")) return;
-    try {
-      const status = await deleteExam(examId);
-      if (status === 200) {
-        toast.success("Exam deleted successfully.");
-        setExams(exams.filter((exam) => exam._id !== examId));
-      }
-    } catch (error) {
-      toast.error("Failed to delete exam.");
-    }
-  };
-
   if (!courseData) {
     return <p>Loading course details...</p>;
   }
@@ -111,7 +94,6 @@ const CourseDetailsPage = () => {
   const tabs = [
     { key: "materials", label: "Course Materials" },
     { key: "quizzes", label: "Quizzes" },
-    { key: "exams", label: "Exams" },
     { key: "assignments", label: "Assignments" },
     { key: "students", label: "Enrolled Students" },
   ];
@@ -194,7 +176,7 @@ const CourseDetailsPage = () => {
                   >
                     <span>
                       {quiz.title} - Due:{" "}
-                      {new Date(quiz.dueDate).toLocaleDateString()}
+                      {new Date(quiz.deadline).toLocaleDateString()}
                     </span>
                     <div>
                       {auth.role === "teacher" ? (
@@ -256,91 +238,6 @@ const CourseDetailsPage = () => {
               })
             ) : (
               <p>No quizzes available.</p>
-            )}
-          </div>
-        )}
-        {activeTab === "exams" && (
-          <div>
-            {auth.role === "teacher" && (
-              <button
-                onClick={() => navigate(`/exams/create/${id}`)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md mb-4"
-              >
-                Create Exam
-              </button>
-            )}
-            <h2 className="text-xl font-semibold">Available Exams</h2>
-            {exams.length > 0 ? (
-              exams.map((exam) => {
-                const studentSubmission = exam.submissions.find(
-                  (submission) => submission.studentId === auth.userId
-                );
-
-                return (
-                  <div
-                    key={exam._id}
-                    className="flex justify-between items-center border-b py-2"
-                  >
-                    <span>
-                      {exam.title} - Due:{" "}
-                      {new Date(exam.dueDate).toLocaleDateString()}
-                    </span>
-                    <div>
-                      {auth.role === "teacher" ? (
-                        <>
-                          <button
-                            onClick={() => navigate(`/exams/edit/${exam._id}`)}
-                            className="px-3 py-1 bg-yellow-500 text-white rounded-md mx-1"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteExam(exam._id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded-md mx-1"
-                          >
-                            Delete
-                          </button>
-                          <button
-                            onClick={() => navigate(`/exams/grade/${exam._id}`)}
-                            className="px-3 py-1 bg-green-500 text-white rounded-md mx-1"
-                          >
-                            View and Grade
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {studentSubmission ? (
-                            <>
-                              <span className="mx-2">
-                                Grade: {studentSubmission.score ?? "Pending"}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  navigate(`/exams/view/${exam._id}`)
-                                }
-                                className="px-3 py-1 bg-blue-500 text-white rounded-md"
-                              >
-                                View Exam
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                navigate(`/exams/take/${exam._id}`)
-                              }
-                              className="px-3 py-1 bg-blue-500 text-white rounded-md"
-                            >
-                              Take Exam
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p>No exams available.</p>
             )}
           </div>
         )}

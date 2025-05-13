@@ -2,16 +2,19 @@ import { useState } from "react";
 import { createQuiz, generateQuizQuestions } from "../api/QuizApis"; // Make sure to create this API
 import { useAuth } from "../auth/AuthProvider";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const CreateQuiz = () => {
   const { courseId } = useParams();
   const auth = useAuth();
+  const navigate = useNavigate();
 
   const [quizData, setQuizData] = useState({
     title: "",
     description: "",
     questions: [],
+    deadline: "",
+    timeLimit: "",
   });
 
   const [newQuestion, setNewQuestion] = useState({
@@ -62,11 +65,15 @@ const CreateQuiz = () => {
     if (!quizData.title.trim()) return toast.error("Quiz title is required.");
     if (quizData.questions.length === 0)
       return toast.error("At least one question is required.");
+    if (!quizData.deadline) return toast.error("Deadline is required.");
+    if (!quizData.timeLimit || quizData.timeLimit <= 0)
+      return toast.error("Time limit must be greater than zero.");
 
     try {
       await createQuiz({ ...quizData, courseId });
       toast.success("Quiz created successfully!");
       setQuizData({ title: "", description: "", questions: [] });
+      navigate(`/view-course/${courseId}`);
     } catch (error) {
       console.log(error);
       toast.error("Failed to create quiz.");
@@ -123,6 +130,27 @@ const CreateQuiz = () => {
         value={quizData.description}
         onChange={(e) =>
           setQuizData({ ...quizData, description: e.target.value })
+        }
+        className="w-full p-2 border rounded-md mb-3"
+      />
+      <label className="block text-sm font-medium mb-1">Deadline</label>
+      <input
+        type="datetime-local"
+        value={quizData.deadline}
+        onChange={(e) => setQuizData({ ...quizData, deadline: e.target.value })}
+        className="w-full p-2 border rounded-md mb-3"
+      />
+
+      <label className="block text-sm font-medium mb-1">
+        Time Limit (in minutes)
+      </label>
+      <input
+        type="number"
+        min={1}
+        placeholder="Enter time limit in minutes"
+        value={quizData.timeLimit}
+        onChange={(e) =>
+          setQuizData({ ...quizData, timeLimit: e.target.value })
         }
         className="w-full p-2 border rounded-md mb-3"
       />
@@ -251,9 +279,21 @@ const CreateQuiz = () => {
       <h2 className="text-lg font-semibold mt-4">Questions Added</h2>
       <ul className="list-disc pl-4">
         {quizData.questions.map((q, index) => (
-          <li key={index} className="mb-2">
-            {q.questionText}{" "}
-            <span className="text-gray-500 text-sm">({q.points} pts)</span>
+          <li key={index} className="mb-2 flex justify-between items-center">
+            <span>
+              {q.questionText}{" "}
+              <span className="text-gray-500 text-sm">({q.points} pts)</span>
+            </span>
+            <button
+              onClick={() => {
+                const updated = [...quizData.questions];
+                updated.splice(index, 1);
+                setQuizData({ ...quizData, questions: updated });
+              }}
+              className="ml-4 text-red-600 hover:underline"
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>

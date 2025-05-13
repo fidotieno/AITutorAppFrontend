@@ -51,11 +51,23 @@ export default function ChatWindow({ conversation, onBack }) {
         ← Back
       </div>
 
+      <div className="px-2 py-1 border-b bg-gray-50">
+        <div className="text-sm font-semibold text-gray-800">
+          Chatting with:{" "}
+          {conversation.participants.find((p) => p.userId._id !== auth.userId)
+            ?.userId.name || "Unknown"}
+        </div>
+        <div className="text-xs text-gray-500">
+          {conversation.participants.find((p) => p.userId._id !== auth.userId)
+            ?.userId.email || ""}
+        </div>
+      </div>
+
       {/* Messages container */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-2 space-y-2"
-        style={{ maxHeight: "calc(100% - 130px)" }} // Make sure there's space for the input box
+        style={{ maxHeight: "calc(100% - 175px)" }} // Make sure there's space for the input box
       >
         {messages.map((msg) => {
           const isMe = msg.sender.userId === auth.userId;
@@ -69,7 +81,18 @@ export default function ChatWindow({ conversation, onBack }) {
                   : "bg-gray-200 text-gray-900 self-start mr-auto"
               }`}
             >
-              {msg.content}
+              {!isMe && (
+                <div className="text-xs font-semibold text-gray-700 mb-1">
+                  {msg.sender.userId.name}
+                </div>
+              )}
+              <div>{msg.content}</div>
+              <div className="text-[10px] text-gray-400 mt-1 text-right">
+                {new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
             </div>
           );
         })}

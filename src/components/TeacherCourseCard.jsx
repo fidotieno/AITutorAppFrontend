@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course }) => {
+  console.log(course.studentsEnrolled.length);
   return (
     <div className="bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl">
       {/* Card Header */}
@@ -30,7 +31,7 @@ const CourseCard = ({ course }) => {
           )}
           <p>
             <span className="font-semibold text-gray-800">Students Enrolled:</span>{" "}
-            {course.totalStudentsEnrolled || 0}
+            {course.studentsEnrolled.length || 0}
           </p>
         </div>
       </div>

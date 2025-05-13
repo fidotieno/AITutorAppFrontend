@@ -3,10 +3,12 @@ const courseFormatter = (courseData) => {
     const id = course._id;
     const title = course.title;
     const instructor = course.teacherId.name;
+    const studentsEnrolled = course.studentsEnrolled.length;
     return {
       id,
       title,
       instructor,
+      studentsEnrolled,
     };
   });
   return cleanedCourses;

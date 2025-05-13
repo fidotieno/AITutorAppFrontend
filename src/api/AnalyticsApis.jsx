@@ -9,6 +9,6 @@ export const getStudentAnalytics = async (studentId) => {
     }
   );
 
-  if (!res.ok) throw new Error("Failed to fetch assignments.");
+  if (!res.ok) throw new Error("Failed to fetch analytics data.");
   return res;
 };

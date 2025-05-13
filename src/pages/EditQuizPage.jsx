@@ -52,7 +52,6 @@ const EditQuizPage = () => {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h1 className="text-2xl font-bold mb-4">Edit Quiz</h1>
-
       <input
         type="text"
         placeholder="Quiz Title"
@@ -60,7 +59,6 @@ const EditQuizPage = () => {
         onChange={(e) => setQuizData({ ...quizData, title: e.target.value })}
         className="w-full p-2 border rounded-md mb-3"
       />
-
       <textarea
         placeholder="Quiz Description"
         value={quizData.description}
@@ -69,9 +67,28 @@ const EditQuizPage = () => {
         }
         className="w-full p-2 border rounded-md mb-3"
       />
-
+      // Insert this below the "Quiz Description" textarea
+      <label className="block text-sm font-medium mb-1">Deadline</label>
+      <input
+        type="datetime-local"
+        value={quizData.deadline ? quizData.deadline.slice(0, 16) : ""}
+        onChange={(e) => setQuizData({ ...quizData, deadline: e.target.value })}
+        className="w-full p-2 border rounded-md mb-3"
+      />
+      <label className="block text-sm font-medium mb-1">
+        Time Limit (in minutes)
+      </label>
+      <input
+        type="number"
+        min={1}
+        placeholder="Enter time limit in minutes"
+        value={quizData.timeLimit || ""}
+        onChange={(e) =>
+          setQuizData({ ...quizData, timeLimit: Number(e.target.value) })
+        }
+        className="w-full p-2 border rounded-md mb-4"
+      />
       <h2 className="text-lg font-semibold mt-4">Edit Questions</h2>
-
       <ul className="list-disc pl-4">
         {quizData.questions.map((q, index) => (
           <li key={q._id || index} className="mb-6 border-b pb-4">
@@ -125,7 +142,6 @@ const EditQuizPage = () => {
           </li>
         ))}
       </ul>
-
       <button
         onClick={handleUpdateQuiz}
         className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"

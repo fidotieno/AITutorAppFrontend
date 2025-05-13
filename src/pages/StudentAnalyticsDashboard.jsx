@@ -58,10 +58,9 @@ const AnalyticsDashboard = ({ studentCode }) => {
         label: "Average Score (%)",
         data: [
           overallPerformance.quizAverage ?? 0,
-          overallPerformance.examAverage ?? 0,
           overallPerformance.assignmentAverage ?? 0,
         ],
-        backgroundColor: ["#3b82f6", "#ef4444", "#10b981"],
+        backgroundColor: ["#3b82f6", "#10b981"],
       },
     ],
   };
@@ -96,12 +95,6 @@ const AnalyticsDashboard = ({ studentCode }) => {
             Total Quizzes:{" "}
             <span className="text-blue-500">
               {overallPerformance.totalQuizzes}
-            </span>
-          </p>
-          <p className="font-semibold">
-            Total Exams:{" "}
-            <span className="text-red-500">
-              {overallPerformance.totalExams}
             </span>
           </p>
           <p className="font-semibold">
@@ -141,18 +134,6 @@ const AnalyticsDashboard = ({ studentCode }) => {
                     <div
                       className="bg-blue-500 h-2 rounded-full"
                       style={{ width: `${course.quizAverage ?? 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  <p className="text-gray-600">
-                    Exam Scores: {course.examScores.length}
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-red-500 h-2 rounded-full"
-                      style={{ width: `${course.examAverage ?? 0}%` }}
                     ></div>
                   </div>
                 </div>

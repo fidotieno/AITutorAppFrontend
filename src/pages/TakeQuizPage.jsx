@@ -44,7 +44,7 @@ const TakeQuizPage = () => {
       const status = await submitQuiz(quizId, { answers });
       if (status === 201) {
         toast.success("Quiz submitted successfully!");
-        // navigate(`/quiz/${quizId}/results`);
+        navigate(`/quizzes/view/${quizId}`);
       }
     } catch (error) {
       toast.error("Failed to submit quiz.");

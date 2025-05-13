@@ -23,7 +23,7 @@ const CourseCard = ({ course, isEnrolled, onEnroll }) => {
             <span className="font-semibold text-gray-900">Format:</span> {course.courseFormat || "N/A"}
           </p>
           <p>
-            <span className="font-semibold text-gray-900">Students Enrolled:</span> {course.totalStudentsEnrolled || 0}
+            <span className="font-semibold text-gray-900">Students Enrolled:</span> {course.studentsEnrolled || 0}
           </p>
         </div>
       </div>

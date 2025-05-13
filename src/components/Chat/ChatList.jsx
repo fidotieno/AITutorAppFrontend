@@ -64,7 +64,7 @@ export default function ChatList({ onSelect }) {
                 key={user._id}
                 onClick={() => handleStartConversation(user)}
                 className="cursor-pointer hover:bg-gray-100 p-2 rounded"
-              >const userId = localStorage.getItem("userId");
+              >
                 {user.name} ({user.email})
               </div>
             ))
@@ -75,14 +75,19 @@ export default function ChatList({ onSelect }) {
       )}
 
       {conversations.map((conv) => {
-        const other = conv.participants.find((p) => p.userId !== auth.userId);
+        const other = conv.participants.find(
+          (p) => p.userId._id !== auth.userId
+        );
         return (
           <div
             key={conv._id}
             onClick={() => onSelect(conv)}
             className="cursor-pointer border border-gray-200 rounded-md p-2 mb-2 hover:bg-gray-100 transition"
           >
-            <div className="font-semibold text-gray-700">{other.userType}</div>
+            <div className="font-semibold text-gray-700">
+              {other.userId?.name || "Unknown User"} ({other.userType})
+            </div>
+            <div className="text-xs text-gray-500">{other.userId?.email}</div>
             <div className="text-sm text-gray-500 line-clamp-1">
               {conv.lastMessage?.content || "No messages yet"}
             </div>

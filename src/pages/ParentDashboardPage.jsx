@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import AnalyticsDashboard from "./StudentAnalyticsDashboard"; // Import Student Dashboard
+import { initiateStkPush } from "../api/MpesaApi";
 
 const ParentDashboard = () => {
   const auth = useAuth();
@@ -78,6 +79,7 @@ const ParentDashboard = () => {
                 <input
                   type="number"
                   placeholder="Amount"
+                  min={1}
                   className="block w-full p-2 border rounded mb-2"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}

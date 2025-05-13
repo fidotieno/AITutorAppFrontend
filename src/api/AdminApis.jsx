@@ -1,7 +1,7 @@
 const API_BASE =
   import.meta.env.VITE_APP_ENVIRONMENT == "development"
     ? "/api/api/admins"
-    : `${import.meta.env.VITE_APP_BACKEND_URL}/api/admins/`;
+    : `${import.meta.env.VITE_APP_BACKEND_URL}/api/admins`;
 
 export const getAllStudents = async (token) => {
   const res = await fetch(`${API_BASE}/students?role=student`, {

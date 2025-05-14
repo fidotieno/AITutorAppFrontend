@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
+import { toast } from "react-toastify";
 import AnalyticsDashboard from "./StudentAnalyticsDashboard"; // Import Student Dashboard
 import { initiateStkPush } from "../api/MpesaApi";
+import { getStudentFees } from "../api/AdminApis";
 
 const ParentDashboard = () => {
   const auth = useAuth();
@@ -9,6 +11,8 @@ const ParentDashboard = () => {
   const [selectedChild, setSelectedChild] = useState(null);
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
+  const [feeRecords, setFeeRecords] = useState([]);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     // Load children from localStorage or fetch from API
@@ -18,6 +22,21 @@ const ParentDashboard = () => {
       setSelectedChild(storedChildren[0]); // Default to first child
     }
   }, []);
+
+  useEffect(() => {
+    const fetchFeeData = async () => {
+      if (selectedChild?._id) {
+        try {
+          const data = await getStudentFees(selectedChild._id, token);
+          setFeeRecords(data);
+        } catch (err) {
+          toast.error(err.message || "Failed to load fee records");
+        }
+      }
+    };
+
+    fetchFeeData();
+  }, [selectedChild]);
 
   return (
     <div className="p-6">
@@ -91,6 +110,24 @@ const ParentDashboard = () => {
               </form>
             </div>
           )}
+          <h3 className="font-semibold mb-2">Fee Records</h3>
+          <ul className="mb-4 max-h-48 overflow-y-auto border rounded p-3 bg-gray-50">
+            {feeRecords.length === 0 ? (
+              <p className="text-sm text-gray-600">No records found.</p>
+            ) : (
+              feeRecords.map((fee) => (
+                <li key={fee._id} className="mb-2 text-sm border-b pb-1">
+                  <p>
+                    💰 KES {fee.amountPaid} - {fee.term}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {fee.paymentMethod} |{" "}
+                    {fee.isPaidInFull ? "✅ Paid in Full" : "❌ Partial"}
+                  </p>
+                </li>
+              ))
+            )}
+          </ul>
         </div>
       ) : (
         <p className="text-gray-500 mt-4">No linked students found.</p>

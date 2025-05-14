@@ -155,23 +155,32 @@ const AuthProvider = ({ children }) => {
     return res.status;
   };
 
-  const getUsers = async (userType) => {
-    const res = await fetch(
+  const getUsers = async (userRole) => {
+    const baseUrl =
       import.meta.env.VITE_APP_ENVIRONMENT === "development"
-        ? `/api/api/users/all?role=${
-            userType === "parent" ? "teacher" : "parent"
-          }`
-        : `${import.meta.env.VITE_APP_BACKEND_URL}/api/users/all?role=${
-            userType === "parent" ? "teacher" : "parent"
-          }`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+        ? "/api/api/users/all"
+        : `${import.meta.env.VITE_APP_BACKEND_URL}/api/users/all`;
+
+    // Determine the query role based on the current user's role
+    let queryRole;
+    if (userRole === "admin") {
+      queryRole = "admin"; // Fetch both teachers and parents
+    } else if (userRole === "teacher") {
+      queryRole = "parent"; // Teachers fetch parents
+    } else if (userRole === "parent") {
+      queryRole = "teacher"; // Parents fetch teachers
+    } else {
+      queryRole = "parent"; // Default/fallback
+    }
+
+    const res = await fetch(`${baseUrl}?role=${queryRole}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     const data = await res.json();
     return data;
   };

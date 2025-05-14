@@ -65,7 +65,13 @@ export default function ChatList({ onSelect }) {
                 onClick={() => handleStartConversation(user)}
                 className="cursor-pointer hover:bg-gray-100 p-2 rounded"
               >
-                {user.name} ({user.email})
+                <p className="font-medium">
+                  {user.name}{" "}
+                  <span className="text-xs text-gray-500 font-normal">
+                    ({user.role})
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600">{user.email}</p>
               </div>
             ))
           ) : (

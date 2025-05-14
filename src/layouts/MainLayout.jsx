@@ -34,9 +34,9 @@ const MainLayout = () => {
         <Outlet />
         <ToastContainer />
         {auth?.role === "student" && <AIStudyAssistant />}
-        {(auth?.role === "parent" || auth?.role === "teacher") && (
-          <ChatButton />
-        )}
+        {(auth?.role === "parent" ||
+          auth?.role === "teacher" ||
+          auth?.role === "admin") && <ChatButton />}
       </main>
     </>
   );

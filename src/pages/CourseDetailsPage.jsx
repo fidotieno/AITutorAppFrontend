@@ -261,7 +261,7 @@ const CourseDetailsPage = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-300 rounded-full">
                         <img
-                          src={student.profilePhoto.url || avatar}
+                          src={student.profilePhoto?.url || avatar}
                           alt="Image of Student"
                         />
                       </div>{" "}

@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import CourseMaterials from "../components/CourseMaterials";
 import CourseAssignments from "../components/CourseAssignments";
 import CourseAnalyticsDashboard from "../components/CourseAnalyticsDashboard";
+import avatar from "../images/avatar-default.png";
 
 const CourseDetailsPage = () => {
   const { id } = useParams();
@@ -260,7 +261,7 @@ const CourseDetailsPage = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-300 rounded-full">
                         <img
-                          src={student.profilePhoto.url}
+                          src={student.profilePhoto.url || avatar}
                           alt="Image of Student"
                         />
                       </div>{" "}

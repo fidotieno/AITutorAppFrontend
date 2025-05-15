@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course, isEnrolled, onEnroll }) => {
+  console.log(course);
   return (
     <div className="bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl">
       {/* Card Header */}

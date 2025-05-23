@@ -34,6 +34,26 @@ const getEnrolledCourses = async () => {
   return data;
 };
 
+const getPendingEnrolledCourses = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    import.meta.env.VITE_APP_ENVIRONMENT == "development"
+      ? "/api/api/courses/get-pending-enrolled-courses"
+      : `${
+          import.meta.env.VITE_APP_BACKEND_URL
+        }/api/courses/get-pending-enrolled-courses`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const data = await res.json();
+  return data;
+};
+
 const enrollCourse = async (courseId) => {
   const token = localStorage.getItem("token");
   const res = await fetch(
@@ -197,7 +217,7 @@ const deleteCourseFile = async (courseId, fileName) => {
         ? `/api/api/courses/${courseId}/delete-file/${fileName}`
         : `${
             import.meta.env.VITE_APP_BACKEND_URL
-          }/api/courses//${courseId}/delete-file/${fileName}`,
+          }/api/courses/${courseId}/delete-file/${fileName}`,
       {
         method: "DELETE",
         headers: {
@@ -219,13 +239,57 @@ const replaceCourseFile = async (courseId, fileName, formData) => {
         ? `/api/api/courses/${courseId}/replace-file/${fileName}`
         : `${
             import.meta.env.VITE_APP_BACKEND_URL
-          }/api/courses//${courseId}/replace-file/${fileName}`,
+          }/api/courses/${courseId}/replace-file/${fileName}`,
       {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         body: formData,
+      }
+    );
+    if (response.ok) return response.status;
+  } catch (error) {
+    console.error("File deletion error:", error);
+  }
+};
+
+const deleteCourse = async (courseId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      import.meta.env.VITE_APP_ENVIRONMENT == "development"
+        ? `/api/api/courses/${courseId}/delete-course`
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/courses/${courseId}/delete-course`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.ok) return response.status;
+  } catch (error) {
+    console.error("File deletion error:", error);
+  }
+};
+
+const cancelEnrollmentRequest = async (courseId, studentId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      import.meta.env.VITE_APP_ENVIRONMENT == "development"
+        ? `/api/api/courses/${courseId}/remove-enrollment`
+        : `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/courses/${courseId}/remove-enrollment`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
     if (response.ok) return response.status;
@@ -247,4 +311,7 @@ export {
   replaceCourseFile,
   unenrollCourse,
   removeStudentFromCourse,
+  deleteCourse,
+  cancelEnrollmentRequest,
+  getPendingEnrolledCourses,
 };

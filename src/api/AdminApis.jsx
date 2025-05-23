@@ -44,3 +44,41 @@ export const recordStudentFee = async (studentId, feeData, token) => {
   if (!res.ok) throw new Error("Failed to record fee");
   return res.json();
 };
+
+export const approveEnrollment = async (studentId, courseId, token) => {
+  const res = await fetch(
+    `${API_BASE}/courses/${courseId}/students/${studentId}/approve`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to approve request.");
+  return res.json();
+};
+
+export const rejectEnrollment = async (studentId, courseId, token) => {
+  const res = await fetch(
+    `${API_BASE}/courses/${courseId}/students/${studentId}/reject`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to reject request.");
+  return res.json();
+};
+
+export const getPendingEnrollmentsForAdmin = async (token) => {
+  const res = await fetch(`${API_BASE}/students/pending-approvals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch approval records");
+  return res.json();
+};

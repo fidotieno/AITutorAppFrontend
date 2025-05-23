@@ -3,71 +3,90 @@ import AnalyticsDashboard from "../pages/StudentAnalyticsDashboard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getEnrolledCourses, enrollCourse } from "../api/CourseApis";
+import {
+  getEnrolledCourses,
+  enrollCourse,
+  cancelEnrollmentRequest,
+  getPendingEnrolledCourses,
+} from "../api/CourseApis";
 import courseFormatter from "../utils/FormatCourses";
 
 const StudentDashboard = ({ courses }) => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
+  const [pendingCourses, setPendingCourses] = useState([]);
   const [showAllEnrolled, setShowAllEnrolled] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(false); // Toggle state for analytics
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
-    const fetchEnrolledCourses = async () => {
-      let coursesData = [];
+    const fetchData = async () => {
       try {
-        coursesData = await getEnrolledCourses();
-        const coursesArray = coursesData.enrolledCourses;
-        const cleanedCourses = courseFormatter(coursesArray);
-        setEnrolledCourses(cleanedCourses);
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      }
-    };
+        // Enrolled Courses
+        const enrolledRes = await getEnrolledCourses();
+        setEnrolledCourses(courseFormatter(enrolledRes.enrolledCourses));
 
-    const fetchCourses = () => {
-      let coursesData = [];
-      try {
-        coursesData = courses;
-        const coursesArray = coursesData.courses;
-        const cleanedCourses = courseFormatter(coursesArray);
+        // Pending Courses
+        const pendingRes = await getPendingEnrolledCourses();
+        setPendingCourses(courseFormatter(pendingRes.pendingEnrollments));
+
+        // Available Courses
+        const cleanedCourses = courseFormatter(courses?.courses || []);
         setAvailableCourses(cleanedCourses);
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        console.error("Error fetching course data:", error);
       }
     };
-    fetchCourses();
-    fetchEnrolledCourses();
+
+    fetchData();
   }, []);
 
-  const handleEnroll = (courseId) => {
-    const enrollInCourse = async () => {
-      try {
-        const response = await enrollCourse({ courseId });
-        if (response === 200) {
-          toast.success("Enrolled successfully!");
-        } else {
-          toast.error("Something went wrong. Please try again.");
-        }
-        const updatedEnrolledCourses = await getEnrolledCourses();
-        const cleanedCourses = courseFormatter(
-          updatedEnrolledCourses.enrolledCourses
-        );
-        setEnrolledCourses(cleanedCourses);
-      } catch (error) {
-        console.error("Failed to enroll in course:", error);
+  const handleEnroll = async (courseId) => {
+    try {
+      const response = await enrollCourse({ courseId });
+      if (
+        response === 200 ||
+        response?.message?.includes("Enrollment request submitted")
+      ) {
+        toast.success("Enrollment request sent!");
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
-    };
 
-    enrollInCourse();
+      // Refresh lists
+      const enrolledRes = await getEnrolledCourses();
+      setEnrolledCourses(courseFormatter(enrolledRes.enrolledCourses));
+
+      const pendingRes = await getPendingEnrolledCourses();
+      setPendingCourses(courseFormatter(pendingRes.pendingEnrollments));
+    } catch (error) {
+      console.error("Failed to enroll in course:", error);
+    }
   };
 
-  // Filter out enrolled courses from available courses
+  const handleCancelEnrollment = async (courseId) => {
+    try {
+      const response = await cancelEnrollmentRequest(courseId);
+      if (response === 200) {
+        toast.success("Enrollment request cancelled.");
+        // Refresh pending and available courses
+        const pendingRes = await getPendingEnrolledCourses();
+        setPendingCourses(courseFormatter(pendingRes.pendingEnrollments));
+
+        const enrolledRes = await getEnrolledCourses();
+        setEnrolledCourses(courseFormatter(enrolledRes.enrolledCourses));
+      } else {
+        toast.error("Failed to cancel enrollment request.");
+      }
+    } catch (error) {
+      console.error("Error cancelling enrollment request:", error);
+    }
+  };
+
+  // Filter courses already enrolled or pending from available
   const availableCoursesToDisplay = availableCourses.filter(
-    (availableCourse) =>
-      !enrolledCourses.some(
-        (enrolledCourse) => enrolledCourse.id === availableCourse.id
-      )
+    (course) =>
+      !enrolledCourses.some((en) => en.id === course.id) &&
+      !pendingCourses.some((pend) => pend.id === course.id)
   );
 
   return (
@@ -75,6 +94,7 @@ const StudentDashboard = ({ courses }) => {
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">
         🎓 Student Dashboard
       </h1>
+
       {/* Toggle Analytics */}
       <button
         onClick={() => setShowAnalytics(!showAnalytics)}
@@ -82,8 +102,8 @@ const StudentDashboard = ({ courses }) => {
       >
         {showAnalytics ? "Hide Analytics" : "View Analytics"}
       </button>
-      {showAnalytics && <AnalyticsDashboard />}{" "}
-      {/* Conditionally render analytics */}
+      {showAnalytics && <AnalyticsDashboard />}
+
       {/* Enrolled Courses */}
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">My Courses</h2>
@@ -92,7 +112,7 @@ const StudentDashboard = ({ courses }) => {
             ? enrolledCourses
             : enrolledCourses.slice(0, 2)
           ).map((course) => (
-            <CourseCard key={course.id} course={course} isEnrolled={true} />
+            <CourseCard key={course.id} course={course} status="enrolled" />
           ))}
         </div>
         {enrolledCourses.length > 2 && (
@@ -104,6 +124,26 @@ const StudentDashboard = ({ courses }) => {
           </button>
         )}
       </section>
+
+      {/* Pending Approvals */}
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Pending Approvals</h2>
+        {pendingCourses.length === 0 ? (
+          <p className="text-gray-600 italic">No pending requests</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pendingCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                status="pending"
+                onCancelEnrollment={handleCancelEnrollment}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Available Courses */}
       <section>
         <h2 className="text-xl font-semibold mb-2">Available Courses</h2>
@@ -112,7 +152,7 @@ const StudentDashboard = ({ courses }) => {
             <CourseCard
               key={course.id}
               course={course}
-              isEnrolled={false}
+              status="available"
               onEnroll={handleEnroll}
             />
           ))}

@@ -20,6 +20,7 @@ const CourseDetailsPage = () => {
   const navigate = useNavigate();
   const [courseData, setCourseData] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [activeTab, setActiveTab] = useState("materials"); // Default tab
   const [quizzes, setQuizzes] = useState([]);
 
@@ -33,6 +34,11 @@ const CourseDetailsPage = () => {
         if (auth.userId) {
           setIsEnrolled(
             data.studentsEnrolled.some((student) => student._id === auth.userId)
+          );
+          setIsPending(
+            data.pendingEnrollments?.some(
+              (student) => student._id === auth.userId
+            )
           );
         }
       } catch (error) {
@@ -49,14 +55,19 @@ const CourseDetailsPage = () => {
       if (isEnrolled) {
         const response = await unenrollCourse(id);
         if (response === 200) toast.success("Unenrolled successfully.");
-      } else {
+      } else if (!isPending) {
         const response = await enrollCourse({ courseId: id });
-        if (response === 200) toast.success("Enrolled successfully!");
+        if (response === 200) toast.success("Enrollment request sent!");
       }
-      // Refresh course data
+
       const updatedCourse = await getCourse(id);
       setCourseData(updatedCourse);
-      setIsEnrolled(!isEnrolled);
+      setIsEnrolled(
+        updatedCourse.studentsEnrolled.some((s) => s._id === auth.userId)
+      );
+      setIsPending(
+        updatedCourse.pendingEnrollments?.some((s) => s._id === auth.userId)
+      );
     } catch (error) {
       toast.error("Failed to update enrollment status.");
     }
@@ -128,12 +139,24 @@ const CourseDetailsPage = () => {
           className={`mt-4 px-6 py-2 text-lg rounded-md font-semibold shadow transition ${
             isEnrolled
               ? "bg-red-500 hover:bg-red-600 text-white"
+              : isPending
+              ? "bg-yellow-400 cursor-not-allowed text-white"
               : "bg-green-500 hover:bg-green-600 text-white"
           }`}
           onClick={handleEnrollment}
+          disabled={isPending}
         >
-          {isEnrolled ? "Unenroll" : "Enroll"}
+          {isEnrolled
+            ? "Unenroll"
+            : isPending
+            ? "Enrollment Pending"
+            : "Request Enrollment"}
         </button>
+      )}
+      {isPending && !isEnrolled && (
+        <p className="mt-2 text-yellow-600 text-sm">
+          Your enrollment request is awaiting admin approval.
+        </p>
       )}
 
       {/* Tabs Navigation */}
@@ -259,12 +282,13 @@ const CourseDetailsPage = () => {
                     className="flex justify-between items-center border-b py-2 last:border-none"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden relative">
                         <img
                           src={student.profilePhoto?.url || avatar}
                           alt="Image of Student"
+                          className="absolute w-full h-full object-cover"
                         />
-                      </div>{" "}
+                      </div>
                       {/* Profile Placeholder */}
                       <div>
                         <span className="font-medium">{student.name}</span>
@@ -285,6 +309,38 @@ const CourseDetailsPage = () => {
             ) : (
               <p className="text-gray-500">No students enrolled yet.</p>
             )}
+            {auth.role === "teacher" &&
+              courseData.pendingEnrollments?.length > 0 && (
+                <section className="mt-6">
+                  <h2 className="text-xl font-semibold mb-3 text-yellow-700">
+                    Pending Approvals
+                  </h2>
+                  <ul className="border rounded-md p-4 bg-yellow-50">
+                    {courseData.pendingEnrollments.map((student) => (
+                      <li
+                        key={student._id}
+                        className="flex justify-between items-center border-b py-2 last:border-none"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden relative">
+                            <img
+                              src={student.profilePhoto?.url || avatar}
+                              alt="Pending Student"
+                              className="absolute w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <span className="font-medium">{student.name}</span>
+                            <p className="text-sm text-gray-600">
+                              {student.email}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
           </section>
         )}
         {activeTab === "analytics" && auth.role === "teacher" && (

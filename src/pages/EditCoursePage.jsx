@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   getCourse,
   editCourse,
   deleteCourseFile,
   replaceCourseFile,
+  deleteCourse,
 } from "../api/CourseApis";
 import { toast } from "react-toastify";
 import FileUploader from "../components/FileUploader";
@@ -16,6 +17,8 @@ const EditCoursePage = () => {
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [replacingFile, setReplacingFile] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const fileInputRefs = useRef({});
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -68,13 +71,13 @@ const EditCoursePage = () => {
     } else toast.error("Something went wrong. Please try again.");
   };
 
-  const handleDeleteFile = async (fileId) => {
-    const response = await deleteCourseFile(id, fileId);
+  const handleDeleteFile = async (fileName) => {
+    const response = await deleteCourseFile(id, fileName);
     if (response === 200) {
       toast.success("File deleted successfully!");
       setCourseData({
         ...courseData,
-        files: courseData.files.filter((file) => file._id !== fileId),
+        files: courseData.files.filter((file) => file.name !== fileName),
       });
       navigate(`/view-course/${id}`);
     } else {
@@ -96,6 +99,30 @@ const EditCoursePage = () => {
       setCourseData(updatedData);
     } else {
       toast.error("Failed to replace file.");
+    }
+  };
+
+  // 🔥 DELETE COURSE HANDLER
+  const handleDeleteCourse = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this course? This action is irreversible."
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const response = await deleteCourse(id);
+      if (response === 200) {
+        toast.success("Course deleted successfully!");
+        navigate("/"); // 🔥 change this to wherever you want
+      } else {
+        toast.error("Failed to delete course.");
+      }
+    } catch (error) {
+      toast.error("Error deleting course.");
+      console.error(error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -225,6 +252,16 @@ const EditCoursePage = () => {
           >
             Save Changes
           </button>
+          {/* 🔥 DELETE BUTTON */}
+          <button
+            onClick={handleDeleteCourse}
+            disabled={deleting}
+            className={`mt-4 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition ${
+              deleting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {deleting ? "Deleting..." : "Delete Course"}
+          </button>
         </form>
       </div>
 
@@ -232,7 +269,44 @@ const EditCoursePage = () => {
       <div className="bg-white shadow-md rounded-md p-6">
         <h2 className="text-xl font-semibold mb-3">Uploaded Files</h2>
         <FileUploader courseId={id} />
-        {/* Existing file display remains unchanged */}
+
+        <div className="mt-4 space-y-4">
+          {courseData?.files?.length > 0 ? (
+            courseData.files.map((file) => (
+              <div
+                key={file._id}
+                className="flex items-center justify-between p-3 border rounded-md"
+              >
+                <span className="text-gray-800">{file.name}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => fileInputRefs.current[file.name]?.click()}
+                    className="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500"
+                  >
+                    Replace
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFile(file.name)}
+                    className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                  <input
+                    type="file"
+                    accept="*"
+                    className="hidden"
+                    ref={(el) => (fileInputRefs.current[file.name] = el)}
+                    onChange={(e) =>
+                      handleReplaceFile(file.name, e.target.files[0])
+                    }
+                  />
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No files uploaded yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

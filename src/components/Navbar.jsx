@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FaSignOutAlt, FaBell } from "react-icons/fa";
+import { FaSignOutAlt, FaBell, FaUserCircle } from "react-icons/fa";
 import { useAuth } from "../auth/AuthProvider";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -24,13 +24,11 @@ const Navbar = () => {
     if (auth.token && isStudent) {
       loadUnreadCount();
 
-      // Refresh unread count every 60 seconds (you can adjust the interval)
       intervalId = setInterval(() => {
         loadUnreadCount();
       }, 60000);
     }
 
-    // Cleanup on unmount or when auth.token changes
     return () => clearInterval(intervalId);
   }, [auth.token, isStudent]);
 
@@ -98,6 +96,7 @@ const Navbar = () => {
               <button
                 onClick={handleBellClick}
                 className="relative hover:text-gray-300 transition duration-300"
+                aria-label="Notifications"
               >
                 <FaBell size={20} />
                 {unreadCount > 0 && (
@@ -145,13 +144,25 @@ const Navbar = () => {
             </div>
           )}
 
+          {/* User info */}
+          <span className="text-sm hidden sm:block">
+            Logged in as{" "}
+            <span className="font-semibold">
+              {auth.userName} ({auth.role})
+            </span>
+          </span>
+
+          {/* Profile Icon */}
           <Link
             to="/view-profile"
             className="hover:text-gray-300 transition duration-300"
+            aria-label="View Profile"
+            title="View Profile"
           >
-            My Profile
+            <FaUserCircle size={22} />
           </Link>
 
+          {/* Logout */}
           <button
             onClick={() => {
               auth.logout();

@@ -29,7 +29,7 @@ const AllCoursesPage = () => {
     try {
       const response = await enrollCourse({ courseId });
       if (response === 200) {
-        toast.success("Enrolled successfully!");
+        toast.success("Enrollment request successfull!");
         navigator("/");
       } else {
         toast.error("Something went wrong. Please try again.");

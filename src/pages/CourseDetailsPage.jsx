@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Skeleton from "react-loading-skeleton";
 import { useAuth } from "../auth/AuthProvider";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -100,7 +101,12 @@ const CourseDetailsPage = () => {
   };
 
   if (!courseData) {
-    return <p>Loading course details...</p>;
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Skeleton height={30} width={`60%`} />
+        <Skeleton count={5} className="mt-4" />
+      </div>
+    );
   }
 
   // Tab definitions
@@ -114,16 +120,25 @@ const CourseDetailsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md mt-5">
-      <h1 className="text-3xl font-bold text-blue-600">{courseData.title}</h1>
-      <p className="text-gray-700 mt-2">{courseData.description}</p>
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-md shadow mb-6">
+        <h1 className="text-3xl font-bold text-blue-600">{courseData.title}</h1>
+        <div className="mt-2 flex items-center space-x-3">
+          <img
+            src={courseData.teacherId?.profilePhoto?.url || avatar}
+            alt="Instructor"
+            className="w-10 h-10 rounded-full object-cover border border-gray-300 shadow-sm"
+          />
+          <span className="text-gray-700 font-medium">
+            {courseData.teacherId?.name || "Unknown Instructor"}
+          </span>
+        </div>
+        <p className="text-gray-700 mt-2">{courseData.description}</p>
+      </div>
 
       {/* Additional Course Information */}
       <div className="mt-4">
         <p className="text-gray-600">
           <strong>Course Code:</strong> {courseData.courseCode || "N/A"}
-        </p>
-        <p className="text-gray-600">
-          <strong>Instructor:</strong> {courseData.teacherId?.name}
         </p>
         <p className="text-gray-600">
           <strong>Category:</strong> {courseData.courseFormat}
@@ -164,10 +179,10 @@ const CourseDetailsPage = () => {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            className={`pb-2 text-lg font-medium ${
+            className={`pb-2 px-1 border-b-2 transition font-medium text-sm sm:text-base focus:outline-none focus-visible:ring-2 ${
               activeTab === tab.key
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-blue-600"
             }`}
             onClick={() => setActiveTab(tab.key)}
           >
@@ -199,68 +214,77 @@ const CourseDetailsPage = () => {
                 );
 
                 return (
-                  <div
-                    key={quiz._id}
-                    className="flex justify-between items-center border-b py-2"
-                  >
-                    <span>
-                      {quiz.title} - Due:{" "}
-                      {new Date(quiz.deadline).toLocaleDateString()}
-                    </span>
-                    <div>
-                      {auth.role === "teacher" ? (
-                        <>
-                          <button
-                            onClick={() =>
-                              navigate(`/quizzes/edit/${quiz._id}`)
-                            }
-                            className="px-3 py-1 bg-yellow-500 text-white rounded-md mx-1"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteQuiz(quiz._id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded-md mx-1"
-                          >
-                            Delete
-                          </button>
-                          <button
-                            onClick={() =>
-                              navigate(`/quizzes/grade/${quiz._id}`)
-                            }
-                            className="px-3 py-1 bg-green-500 text-white rounded-md mx-1"
-                          >
-                            View and Grade
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {studentSubmission ? (
-                            <>
-                              <span className="mx-2">
-                                Grade: {studentSubmission.score ?? "Pending"}
-                              </span>
+                  <div className="bg-white border rounded-md p-4 mb-3 shadow-sm hover:shadow transition">
+                    <div
+                      key={quiz._id}
+                      className="flex justify-between items-center border-b py-2"
+                    >
+                      <span className="font-semibold text-blue-700">
+                        {quiz.title}
+                      </span>
+                      <span className="text-sm text-gray-500 ml-2">
+                        Due:{" "}
+                        {new Date(quiz.deadline).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                      <div>
+                        {auth.role === "teacher" ? (
+                          <>
+                            <button
+                              onClick={() =>
+                                navigate(`/quizzes/edit/${quiz._id}`)
+                              }
+                              className="px-3 py-1 bg-yellow-500 text-white rounded-md mx-1"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQuiz(quiz._id)}
+                              className="px-3 py-1 bg-red-500 text-white rounded-md mx-1"
+                            >
+                              Delete
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate(`/quizzes/grade/${quiz._id}`)
+                              }
+                              className="px-3 py-1 bg-green-500 text-white rounded-md mx-1"
+                            >
+                              View and Grade
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {studentSubmission ? (
+                              <>
+                                <span className="mx-2">
+                                  Grade: {studentSubmission.score ?? "Pending"}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    navigate(`/quizzes/view/${quiz._id}`)
+                                  }
+                                  className="px-3 py-1 bg-blue-500 text-white rounded-md"
+                                >
+                                  View Quiz
+                                </button>
+                              </>
+                            ) : (
                               <button
                                 onClick={() =>
-                                  navigate(`/quizzes/view/${quiz._id}`)
+                                  navigate(`/quizzes/take/${quiz._id}`)
                                 }
                                 className="px-3 py-1 bg-blue-500 text-white rounded-md"
                               >
-                                View Quiz
+                                Take Quiz
                               </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                navigate(`/quizzes/take/${quiz._id}`)
-                              }
-                              className="px-3 py-1 bg-blue-500 text-white rounded-md"
-                            >
-                              Take Quiz
-                            </button>
-                          )}
-                        </>
-                      )}
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

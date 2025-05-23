@@ -6,7 +6,7 @@ const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
       return (
         <Link
           to={`/view-course/${course._id || course.id}`}
-          className="px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition duration-200"
+          className="px-5 py-2 text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-md font-medium hover:opacity-90 transition duration-200"
         >
           View Course
         </Link>
@@ -16,12 +16,9 @@ const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
     if (status === "pending") {
       return (
         <div className="flex flex-col items-center gap-2">
-          <button
-            disabled
-            className="px-4 py-2 bg-yellow-300 text-yellow-800 font-semibold rounded-md cursor-not-allowed"
-          >
+          <span className="px-4 py-2 bg-yellow-200 text-yellow-800 font-medium rounded-md text-sm">
             Pending Approval
-          </button>
+          </span>
           {onCancelEnrollment && (
             <button
               onClick={() => onCancelEnrollment(course._id || course.id)}
@@ -37,48 +34,56 @@ const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
     return (
       <button
         onClick={() => onEnroll(course._id || course.id)}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition duration-200"
+        className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-2 rounded-md font-medium hover:opacity-90 transition duration-200"
       >
-        Enroll
+        Enroll Now
       </button>
     );
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden transform transition duration-300 hover:shadow-xl">
-      {/* Card Header */}
-      <div className="p-4 bg-blue-600 text-white">
-        <h3 className="text-xl font-bold">{course.title}</h3>
-        <p className="text-sm text-gray-200">
-          Instructor: {course.instructor || course.teacherId?.name || "Unknown"}
-        </p>
-        <p className="text-sm text-gray-200 italic">
-          Code: {course.courseCode || "N/A"}
-        </p>
-      </div>
-
-      {/* Card Body */}
-      <div className="p-4 space-y-2">
-        <div className="text-sm text-gray-700 space-y-1">
-          <p>
-            <span className="font-semibold text-gray-900">Level:</span>{" "}
-            {course.level || "All Levels"}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+      {/* Header */}
+      <div className="p-4 bg-blue-600 text-white flex justify-between items-start rounded-t-xl">
+        <div className="pr-3">
+          <h3 className="text-xl font-bold">{course.title}</h3>
+          <p className="text-sm text-gray-200 flex items-center gap-2">
+            Instructor:{" "}
+            {course.instructor || course.teacherId?.name || "Unknown"}
           </p>
-          <p>
-            <span className="font-semibold text-gray-900">Duration:</span>{" "}
-            {course.duration || "N/A"}
-          </p>
-          <p>
-            <span className="font-semibold text-gray-900">Format:</span>{" "}
-            {course.courseFormat || "N/A"}
-          </p>
-          <p>
-            <span className="font-semibold text-gray-900">
-              Students Enrolled:
-            </span>{" "}
-            {course.studentsEnrolled || 0}
+          <p className="text-sm italic text-gray-300">
+            Code: {course.courseCode || "N/A"}
           </p>
         </div>
+
+        {/* Profile Image */}
+        {course.profilePhoto && (
+          <img
+            src={course.profilePhoto}
+            alt="Instructor"
+            className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover"
+          />
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="p-4 space-y-2 text-sm text-gray-800">
+        <p>
+          <span className="font-semibold">Level:</span>{" "}
+          {course.level || "All Levels"}
+        </p>
+        <p>
+          <span className="font-semibold">Duration:</span>{" "}
+          {course.duration || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Format:</span>{" "}
+          {course.courseFormat || "N/A"}
+        </p>
+        <p>
+          <span className="font-semibold">Students Enrolled:</span>{" "}
+          {course.studentsEnrolled || 0}
+        </p>
       </div>
 
       {/* Footer */}

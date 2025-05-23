@@ -47,7 +47,13 @@ const CourseCard = ({ course }) => {
       </div>
 
       {/* Card Footer */}
-      <div className="p-4 bg-gray-100 flex justify-end">
+      <div className="p-4 bg-gray-100 flex justify-between items-center">
+        <Link
+          to={`/edit-course/${course._id}`}
+          className="text-sm text-yellow-600 hover:underline"
+        >
+          Edit
+        </Link>
         <Link
           to={`/view-course/${course._id}`}
           className="px-4 py-2 text-blue-600 font-semibold border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition duration-200"

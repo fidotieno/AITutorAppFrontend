@@ -21,15 +21,12 @@ const StudentDashboard = ({ courses }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Enrolled Courses
         const enrolledRes = await getEnrolledCourses();
         setEnrolledCourses(courseFormatter(enrolledRes.enrolledCourses));
 
-        // Pending Courses
         const pendingRes = await getPendingEnrolledCourses();
         setPendingCourses(courseFormatter(pendingRes.pendingEnrollments));
 
-        // Available Courses
         const cleanedCourses = courseFormatter(courses?.courses || []);
         setAvailableCourses(cleanedCourses);
       } catch (error) {
@@ -52,7 +49,6 @@ const StudentDashboard = ({ courses }) => {
         toast.error("Something went wrong. Please try again.");
       }
 
-      // Refresh lists
       const enrolledRes = await getEnrolledCourses();
       setEnrolledCourses(courseFormatter(enrolledRes.enrolledCourses));
 
@@ -68,7 +64,6 @@ const StudentDashboard = ({ courses }) => {
       const response = await cancelEnrollmentRequest(courseId);
       if (response === 200) {
         toast.success("Enrollment request cancelled.");
-        // Refresh pending and available courses
         const pendingRes = await getPendingEnrolledCourses();
         setPendingCourses(courseFormatter(pendingRes.pendingEnrollments));
 
@@ -82,7 +77,6 @@ const StudentDashboard = ({ courses }) => {
     }
   };
 
-  // Filter courses already enrolled or pending from available
   const availableCoursesToDisplay = availableCourses.filter(
     (course) =>
       !enrolledCourses.some((en) => en.id === course.id) &&
@@ -90,48 +84,76 @@ const StudentDashboard = ({ courses }) => {
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">
+    <div className="p-6 max-w-screen-xl mx-auto">
+      <h1 className="text-4xl font-bold text-center mb-8 text-blue-600">
         🎓 Student Dashboard
       </h1>
 
-      {/* Toggle Analytics */}
-      <button
-        onClick={() => setShowAnalytics(!showAnalytics)}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-md"
-      >
-        {showAnalytics ? "Hide Analytics" : "View Analytics"}
-      </button>
+      <div className="flex justify-center mb-8">
+        <button
+          onClick={() => setShowAnalytics(!showAnalytics)}
+          className={`px-6 py-2 rounded-lg font-medium transition shadow-md ${
+            showAnalytics
+              ? "bg-indigo-600 text-white"
+              : "bg-white text-indigo-600 border border-indigo-600"
+          }`}
+        >
+          {showAnalytics ? "Hide Analytics" : "View Analytics"}
+        </button>
+      </div>
       {showAnalytics && <AnalyticsDashboard />}
 
       {/* Enrolled Courses */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">My Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(showAllEnrolled
-            ? enrolledCourses
-            : enrolledCourses.slice(0, 2)
-          ).map((course) => (
-            <CourseCard key={course.id} course={course} status="enrolled" />
-          ))}
-        </div>
-        {enrolledCourses.length > 2 && (
-          <button
-            onClick={() => setShowAllEnrolled(!showAllEnrolled)}
-            className="mt-4 text-blue-500 underline hover:cursor-pointer"
-          >
-            {showAllEnrolled ? "Show Less" : "View All My Courses"}
-          </button>
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          📚 My Courses
+        </h2>
+
+        {enrolledCourses.length === 0 ? (
+          <p className="text-gray-500 italic">
+            You are not enrolled in any courses yet.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(showAllEnrolled
+                ? enrolledCourses
+                : enrolledCourses.slice(0, 2)
+              ).map((course) => (
+                <CourseCard key={course.id} course={course} status="enrolled" />
+              ))}
+            </div>
+
+            {enrolledCourses.length > 2 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowAllEnrolled(!showAllEnrolled)}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-500 rounded-md hover:bg-blue-50 transition duration-200"
+                >
+                  {showAllEnrolled ? "Show Less" : "See All My Courses"}
+                  <span
+                    className={`transform transition-transform duration-300 ${
+                      showAllEnrolled ? "-rotate-90" : "rotate-90"
+                    }`}
+                  >
+                    ▶
+                  </span>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
       {/* Pending Approvals */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Pending Approvals</h2>
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          ⏳ Pending Approvals
+        </h2>
         {pendingCourses.length === 0 ? (
-          <p className="text-gray-600 italic">No pending requests</p>
+          <p className="text-gray-500 italic">No pending requests</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pendingCourses.map((course) => (
               <CourseCard
                 key={course.id}
@@ -146,8 +168,10 @@ const StudentDashboard = ({ courses }) => {
 
       {/* Available Courses */}
       <section>
-        <h2 className="text-xl font-semibold mb-2">Available Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          🆕 Available Courses
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {availableCoursesToDisplay.slice(0, 2).map((course) => (
             <CourseCard
               key={course.id}
@@ -157,12 +181,14 @@ const StudentDashboard = ({ courses }) => {
             />
           ))}
         </div>
-        <Link
-          to="/all-courses"
-          className="mt-4 inline-block text-blue-500 underline"
-        >
-          View All Available Courses
-        </Link>
+        <div className="mt-4 text-center">
+          <Link
+            to="/all-courses"
+            className="text-indigo-600 underline hover:text-indigo-800"
+          >
+            View All Available Courses
+          </Link>
+        </div>
       </section>
     </div>
   );

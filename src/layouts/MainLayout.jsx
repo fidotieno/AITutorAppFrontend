@@ -19,12 +19,12 @@ const MainLayout = () => {
   return (
     <>
       <Navbar />
-      <main className="px-4 py-2 max-w-7xl mx-auto">
+      <main className="px-6 py-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
         {/* Back Button with Icon */}
         {showBackButton && (
           <button
             onClick={() => navigate(-1)}
-            className="mb-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition cursor-pointer"
+            className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold hover:underline"
           >
             <FaArrowLeft className="text-lg" />
             Back

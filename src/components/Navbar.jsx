@@ -81,10 +81,10 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-blue-500 text-white p-4 flex justify-between items-center shadow-md relative">
+    <nav className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex justify-between items-center shadow-lg relative">
       <Link
         to="/"
-        className="text-xl font-semibold hover:text-gray-300 transition duration-300"
+        className="text-2xl tracking-wide font-bold hover:text-gray-100 transition duration-300"
       >
         EduTech
       </Link>
@@ -95,7 +95,7 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={handleBellClick}
-                className="relative hover:text-gray-300 transition duration-300"
+                className="relative hover:bg-blue-700 transition p-2 rounded-full"
                 aria-label="Notifications"
               >
                 <FaBell size={20} />
@@ -107,7 +107,7 @@ const Navbar = () => {
               </button>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded shadow-lg z-50 max-h-96 overflow-y-auto">
+                <div className="absolute right-0 mt-2 w-80 bg-white text-black rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto animate-fade-in-down">
                   {notifications.length === 0 ? (
                     <p className="p-4 text-sm text-gray-600">
                       No notifications.
@@ -145,11 +145,9 @@ const Navbar = () => {
           )}
 
           {/* User info */}
-          <span className="text-sm hidden sm:block">
-            Logged in as{" "}
-            <span className="font-semibold">
-              {auth.userName} ({auth.role})
-            </span>
+          <span className="text-sm hidden sm:block text-gray-100">
+            Logged in as <span className="font-medium">{auth.userName}</span>{" "}
+            <span className="italic text-gray-300">({auth.role})</span>
           </span>
 
           {/* Profile Icon */}

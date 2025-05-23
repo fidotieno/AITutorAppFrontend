@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
+  console.log(course);
   const renderFooter = () => {
     if (status === "enrolled") {
       return (
@@ -78,7 +79,7 @@ const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
         </p>
         <p>
           <span className="font-semibold">Format:</span>{" "}
-          {course.courseFormat || "N/A"}
+          {course.format || "N/A"}
         </p>
         <p>
           <span className="font-semibold">Students Enrolled:</span>{" "}

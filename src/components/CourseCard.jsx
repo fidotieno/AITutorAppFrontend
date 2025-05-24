@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course, status, onEnroll, onCancelEnrollment }) => {
-  console.log(course);
   const renderFooter = () => {
     if (status === "enrolled") {
       return (

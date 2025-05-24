@@ -58,6 +58,9 @@ const AuthProvider = ({ children }) => {
         localStorage.setItem("userId", res.user._id);
         localStorage.setItem("role", res.user.role);
         localStorage.setItem("token", res.token);
+        if (res.user.role === "student") {
+          localStorage.setItem("isApproved", res.user.isApproved);
+        }
 
         return response.status;
       }
@@ -107,6 +110,7 @@ const AuthProvider = ({ children }) => {
     setToken("");
 
     // Clear from localStorage
+    localStorage.removeItem("isApproved");
     localStorage.removeItem("userName");
     localStorage.removeItem("userId");
     localStorage.removeItem("role");

@@ -6,6 +6,9 @@ import {
   getStudentFees,
   recordStudentFee,
   getPendingEnrollmentsForAdmin,
+  getUnapprovedStudents,
+  approveStudent,
+  rejectStudent,
   approveEnrollment,
   rejectEnrollment,
 } from "../api/AdminApis";
@@ -25,7 +28,7 @@ const AdminDashboard = () => {
     isPaidInFull: false,
     paymentMethod: "Cash",
   });
-
+  const [unapprovedStudents, setUnapprovedStudents] = useState([]);
   const [pendingEnrollments, setPendingEnrollments] = useState([]);
   const token = localStorage.getItem("token");
 
@@ -37,6 +40,9 @@ const AdminDashboard = () => {
 
         const enrollments = await getPendingEnrollmentsForAdmin(token);
         setPendingEnrollments(enrollments);
+
+        const unapproved = await getUnapprovedStudents(token);
+        setUnapprovedStudents(unapproved);
       } catch (err) {
         toast.error(err.message);
       }
@@ -109,6 +115,28 @@ const AdminDashboard = () => {
     } catch (err) {
       console.log(err);
       toast.error("Failed to reject enrollment");
+    }
+  };
+
+  const handleApproveStudent = async (studentId) => {
+    try {
+      await approveStudent(studentId, token);
+      toast.success("Student approved");
+      const refreshed = await getUnapprovedStudents(token);
+      setUnapprovedStudents(refreshed);
+    } catch (err) {
+      toast.error("Failed to approve student");
+    }
+  };
+
+  const handleRejectStudent = async (studentId) => {
+    try {
+      await rejectStudent(studentId, token);
+      toast.success("Student rejected and removed");
+      const refreshed = await getUnapprovedStudents(token);
+      setUnapprovedStudents(refreshed);
+    } catch (err) {
+      toast.error("Failed to reject student");
     }
   };
 
@@ -293,6 +321,51 @@ const AdminDashboard = () => {
                   </button>
                   <button
                     onClick={() => handleReject(req.courseId, req.studentId)}
+                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      {/* Unapproved Students */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold text-blue-700 mb-4">
+          ⏳ Unapproved Student Accounts
+        </h2>
+        {unapprovedStudents.length === 0 ? (
+          <p className="text-gray-600 italic">All students are approved.</p>
+        ) : (
+          <ul className="space-y-4">
+            {unapprovedStudents.map((student) => (
+              <li
+                key={student._id}
+                className="p-4 border rounded shadow bg-white flex flex-col md:flex-row md:items-center justify-between gap-4"
+              >
+                <div>
+                  <p>
+                    <strong>Name:</strong> {student.name}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {student.email}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Registered on:{" "}
+                    {new Date(student.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApproveStudent(student._id)}
+                    className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleRejectStudent(student._id)}
                     className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
                   >
                     Reject

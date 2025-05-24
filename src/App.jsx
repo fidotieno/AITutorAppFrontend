@@ -29,6 +29,7 @@ import StudentViewQuizResultsPage from "./pages/StudentViewQuizResultsPage";
 import courseLoader from "./loaders/courseLoader";
 import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
 import StudentAnalyticsDashboardPage from "./pages/StudentAnalyticsDashboard";
+import UnapprovedPage from "./pages/UnapprovedPage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -42,8 +43,9 @@ const App = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} loader={courseLoader} />
+          <Route path="/unapproved" element={<UnapprovedPage />} />
           <Route element={<PrivateRoute />}>
+            <Route index element={<HomePage />} loader={courseLoader} />
             <Route path="/view-profile" element={<ViewProfilePage />} />
             <Route path="/edit-profile" element={<EditProfilePage />} />
             <Route

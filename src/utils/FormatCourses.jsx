@@ -1,7 +1,7 @@
 const courseFormatter = (courseData) => {
-  console.log(courseData);
   const cleanedCourses = courseData.map((course) => {
     const id = course._id;
+    const courseCode = course.courseCode;
     const title = course.title;
     const instructor = course.teacherId.name;
     const studentsEnrolled = course.studentsEnrolled.length;
@@ -16,6 +16,7 @@ const courseFormatter = (courseData) => {
       profilePhoto,
       duration,
       format,
+      courseCode,
     };
   });
   return cleanedCourses;

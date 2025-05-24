@@ -4,7 +4,11 @@ import { useAuth } from "./AuthProvider";
 
 const PrivateRoute = () => {
   const user = useAuth();
+  const approved = localStorage.getItem("isApproved") === "true";
   if (!user.token) return <Navigate to="/login" />;
+  if (user.role === "student" && !approved) {
+    return <Navigate to="/unapproved" />;
+  }
   return <Outlet />;
 };
 

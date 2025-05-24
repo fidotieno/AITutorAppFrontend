@@ -75,8 +75,40 @@ export const rejectEnrollment = async (studentId, courseId, token) => {
   return res.json();
 };
 
+export const approveStudent = async (studentId, token) => {
+  const res = await fetch(`${API_BASE}/students/${studentId}/approve`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to approve request.");
+  return res.json();
+};
+
+export const rejectStudent = async (studentId, token) => {
+  const res = await fetch(`${API_BASE}/students/${studentId}/reject`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to reject request.");
+  return res.json();
+};
+
 export const getPendingEnrollmentsForAdmin = async (token) => {
   const res = await fetch(`${API_BASE}/students/pending-approvals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch approval records");
+  return res.json();
+};
+
+export const getUnapprovedStudents = async (token) => {
+  const res = await fetch(`${API_BASE}/students/pending-system-access`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to fetch approval records");
